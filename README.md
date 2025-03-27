@@ -4,10 +4,10 @@
 O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar a consulta acerca de artefatos do padrão FHIR (versão 4.0.1). Estes podem estar disponibilizados em uma entrada definida por um conjunto formado por guias de implementação (.tgz), diretórios e arquivos.
 
 ## Estrutura de organização no Github
-- Main Branch: Branch principal, contém a versão estável da aplicação.
-- Branch de desenvolvimento: Branch utilizada para o intermédio da aplicação.
-- Branch de tarefas: Branch utilizada para o desenvolvimento de tarefas.
-- Branch de correção: Branch utiliada para corregir erros na aplicação.
+- Main Branch (master): Branch principal, contém a versão estável da aplicação.
+- Branch de desenvolvimento (dev): Branch utilizada para o intermédio da aplicação.
+- Branch de tarefas (feature): Branch utilizada para o desenvolvimento de tarefas.
+- Branch de correção (bugfix/hotfix): Branch utiliada para corrigir erros na aplicação.
 
 
 ## Tecnologias utilizadas 
@@ -29,7 +29,7 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 - [D3.js](https://d3js.org/)
 
 ### Testes
-- TDD
+- [xUnit](https://xunit.net/)
 
 ### Outras Tecnologias
 

@@ -9,15 +9,6 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 - Branch de tarefas: Branch utilizada para o desenvolvimento de tarefas.
 - Branch de correção: Branch utiliada para corregir erros na aplicação.
 
-```mermaid
-graph TD
-   A[Branch de tarefa] -->|Após a finalização da tarefa| B[Branch de dev] -->|Análise da tarefa| C[Branch Main] --> |Aplicação estável|
-```
-```mermaid
-graph TD
-   A[Branch de correção] -->|Após a finalização da correção| B[Branch de dev] -->|Análise da tarefa| C[Branch Main] --> |Aplicação estável|
-
-```
 
 ## Tecnologias utilizadas 
 

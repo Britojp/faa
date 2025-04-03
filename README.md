@@ -46,6 +46,14 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 
 
 ## Requisitos funcionais
+- Permitir como itens de entrada: Guias de implementação(URLs canônicas), pacotes .tgz, arquivos .zip, URLs(links diretos para arquivos ou pastas), diretórios, arquivos individuais, expressões regulares(regex)
+- Extrair e gerar metadados do ítem de entrada,para apoiar as funcionalidades de busca, validação e visualização
+- Monitorar diretórios e arquivos para sinalizar atualizações que devam refletir nos metadados
+- Validar se as URLs canônicas estão acessiveis
+- Permitir verificação das referências literais (Reference.reference) contidas, relativas e absolutas estão acessiveis
+- Permitir verificação das referências literais (Reference.reference) urn:oid e urn:uuid são sintaticamente válidas e se estão acessíveis.
+- Permitir verificação da referência lógica (Reference.identifier) está acessível (caso seja URL).
+- Permitir validação da Estrutura do Artefato utilizando HL7 FHIR Validator
 - Permitir busca por sequência de caractere/nome - em elementos para filtragem, como: nome artistas, url canônica, comentário, segurança...
 - Permitir filtragem por tipo de artefato
 - Permitir filtragem por status de validação

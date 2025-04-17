@@ -1,10 +1,6 @@
 ﻿using FhirArtifactAnalyzer.CrossCutting;
-using FhirArtifactAnalyzer.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Raven.Client.Documents.Session;
-
-public record Teste(string? Id, string Name);
 
 class Program
 {

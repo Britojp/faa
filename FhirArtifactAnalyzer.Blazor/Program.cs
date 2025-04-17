@@ -1,9 +1,13 @@
 using FhirArtifactAnalyzer.Blazor.Components;
+using FhirArtifactAnalyzer.CrossCutting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
+builder.Services
+    .AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 

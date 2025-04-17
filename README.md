@@ -15,13 +15,13 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 ### Backend
 - [C#](https://learn.microsoft.com/pt-br/dotnet/csharp/tour-of-csharp/)
 - [.NET Core](https://dotnet.microsoft.com/pt-br/download/dotnet/8.0)
-- [Entity Framework](https://learn.microsoft.com/pt-br/ef/core/)
+- [RavenDB Client](https://www.nuget.org/packages/ravendb.client/)
 - [HL7](https://www.nuget.org/packages/hl7.fhir.r4)
 - [FluentValidation](https://docs.fluentvalidation.net/en/latest/)
 - [CsvHelper](https://joshclose.github.io/CsvHelper/)
 
 ### Database
-- [MySQL](https://www.mysql.com/)
+- [RavenDB](https://ravendb.net/)
 
 ### Frontend
 - [Blazor](https://dotnet.microsoft.com/pt-br/apps/aspnet/web-apps/blazor)

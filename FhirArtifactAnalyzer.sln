@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35913.81 d17.13
+VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.Blazor", "FhirArtifactAnalyzer.Blazor\FhirArtifactAnalyzer.Blazor.csproj", "{095C0107-D9EF-414B-81E3-5903514F583B}"
 EndProject
@@ -13,9 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.CrossC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.Application", "FhirArtifactAnalyzer.Application\FhirArtifactAnalyzer.Application.csproj", "{923247F9-05E8-43C0-B9FF-35879772409E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.Cli", "FhirArtifactAnalyzer.Cli\FhirArtifactAnalyzer.Cli.csproj", "{489E6C17-BD53-4F8B-864D-847C5A132B91}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.Tests", "FhirArtifactAnalyzer.Tests\FhirArtifactAnalyzer.Tests.csproj", "{F28F6A3A-6308-4B50-BE4D-2957BDDA70B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.Cli", "FhirArtifactAnalyzer.Cli\FhirArtifactAnalyzer.Cli.csproj", "{E53D0887-5FBA-4133-BF1B-FE913CA7E557}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,14 +43,14 @@ Global
 		{923247F9-05E8-43C0-B9FF-35879772409E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{923247F9-05E8-43C0-B9FF-35879772409E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{923247F9-05E8-43C0-B9FF-35879772409E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{489E6C17-BD53-4F8B-864D-847C5A132B91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{489E6C17-BD53-4F8B-864D-847C5A132B91}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{489E6C17-BD53-4F8B-864D-847C5A132B91}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{489E6C17-BD53-4F8B-864D-847C5A132B91}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F28F6A3A-6308-4B50-BE4D-2957BDDA70B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F28F6A3A-6308-4B50-BE4D-2957BDDA70B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F28F6A3A-6308-4B50-BE4D-2957BDDA70B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F28F6A3A-6308-4B50-BE4D-2957BDDA70B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E53D0887-5FBA-4133-BF1B-FE913CA7E557}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E53D0887-5FBA-4133-BF1B-FE913CA7E557}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E53D0887-5FBA-4133-BF1B-FE913CA7E557}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E53D0887-5FBA-4133-BF1B-FE913CA7E557}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

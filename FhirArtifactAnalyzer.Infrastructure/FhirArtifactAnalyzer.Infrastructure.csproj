@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="RavenDB.Client" Version="7.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FhirArtifactAnalyzer.Domain\FhirArtifactAnalyzer.Domain.csproj" />
   </ItemGroup>
 

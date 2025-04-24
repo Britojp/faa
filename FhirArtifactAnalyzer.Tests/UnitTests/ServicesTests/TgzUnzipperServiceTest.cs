@@ -15,38 +15,33 @@ namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
         }
 
         [Fact]
-        public void TgzUnzipperService_ExtrairTgz_DeveExtrairCorretamente()
+        public void Extractor_ShouldExtractTgzFileCorrectly()
         {
-            // Arrange
             var service = new TgzUnzipperService();
-            string tgzArquivoTeste = Path.Combine("Assets", "fhir_test_bundle.tgz");
-            string diretorioDestino = Path.Combine("TestOutput", "extracao");
+            var testFilePath = Path.Combine("Assets", "fhir_test_bundle.tgz");
+            var outputDirectory = Path.Combine("TestOutput", "extracted");
 
-            Assert.True(File.Exists(tgzArquivoTeste), $"Arquivo de teste '{tgzArquivoTeste}' não encontrado.");
+            Assert.True(File.Exists(testFilePath), $"Test file '{testFilePath}' not found.");
 
-            if (Directory.Exists(diretorioDestino))
-                Directory.Delete(diretorioDestino, true);
+            if (Directory.Exists(outputDirectory))
+                Directory.Delete(outputDirectory, recursive: true);
 
-            Directory.CreateDirectory(diretorioDestino);
+            Directory.CreateDirectory(outputDirectory);
 
-            // Act
-            service.ExtrairTgz(tgzArquivoTeste, diretorioDestino);
+            service.TgzExtractor(testFilePath, outputDirectory);
 
-            // Assert
-            Assert.True(Directory.Exists(diretorioDestino), "Diretório de destino não foi criado.");
+            Assert.True(Directory.Exists(outputDirectory), "Output directory was not created.");
 
-            var arquivos = Directory.GetFiles(diretorioDestino, "*", SearchOption.AllDirectories);
+            var extractedFiles = Directory.GetFiles(outputDirectory, "*", SearchOption.AllDirectories);
 
-            foreach (var arquivo in arquivos)
+            foreach (var file in extractedFiles)
             {
-                _output.WriteLine("Arquivo extraído: " + arquivo);
+                _output.WriteLine("Extracted file: " + file);
             }
 
-            Assert.NotEmpty(arquivos); 
-
-            Assert.Contains(arquivos, f => f.EndsWith("Observation-example.json"));
-            Assert.Contains(arquivos, f => f.EndsWith("Patient-example.json"));
+            Assert.NotEmpty(extractedFiles);
+            Assert.Contains(extractedFiles, f => f.EndsWith("Observation-example.json"));
+            Assert.Contains(extractedFiles, f => f.EndsWith("Patient-example.json"));
         }
-
     }
 }

@@ -8,38 +8,46 @@ namespace FhirArtifactAnalyzer.Application.Services
 {
     public class TgzUnzipperService
     {
-        // ------------ Descomprime o .gz de um arquivo .tgz para .tar, extrai esse .tar e limpa o arquivo temporário ----------------
-        public void ExtrairTgz(string tgzCaminhoArquivo, string diretorioDestino)
+        /// <summary>
+        /// Extrai um arquivo .tgz, descomprimindo o conteúdo .gz em um arquivo .tar temporário, 
+        /// e então extraindo o conteúdo do .tar no diretório de destino. O arquivo .tar é excluído ao final.
+        /// </summary>
+        /// <param name="tgzFilePath">Caminho do arquivo .tgz a ser extraído.</param>
+        /// <param name="destinationDirectory">Diretório onde os arquivos extraídos serão salvos.</param>
+        public void TgzExtractor(string tgzFilePath, string destinationDirectory)
         {
-            // cria um caminho temporario para o .tar ser salvo após descomprimir o .gz
-            string caminhoTar = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(tgzCaminhoArquivo) + ".tar");
+            var tempTarPath = Path.Combine(Path.GetTempPath(), Path.GetFileNameWithoutExtension(tgzFilePath) + ".tar");
 
-            // 1. descomprimir o .gz para .tar
-            using (var arquivoGzip = File.OpenRead(tgzCaminhoArquivo))
-            using (var arquivoTar = File.Create(caminhoTar))
-            using (var gzipStream = new GZipStream(arquivoGzip, CompressionMode.Decompress))
+            using (var gzipFile = File.OpenRead(tgzFilePath))
+            using (var tarFile = File.Create(tempTarPath))
+            using (var gzipStream = new GZipStream(gzipFile, CompressionMode.Decompress))
             {
-                gzipStream.CopyTo(arquivoTar);
+                gzipStream.CopyTo(tarFile);
             }
 
-            // 2. extrair o .tar
-            using (var tar = TarArchive.Open(caminhoTar))
+            ExtractTarEntries(tempTarPath, destinationDirectory);
+
+            File.Delete(tempTarPath);
+        }
+
+        /// <summary>
+        /// Extrai todas as entradas de um arquivo .tar para o diretório de destino.
+        /// </summary>
+        /// <param name="tarFilePath">Caminho do arquivo .tar a ser extraído.</param>
+        /// <param name="destinationDirectory">Diretório onde os arquivos extraídos serão salvos.</param>
+        private void ExtractTarEntries(string tarFilePath, string destinationDirectory)
+        {
+            using var tar = TarArchive.Open(tarFilePath);
+            foreach (var entry in tar.Entries)
             {
-                foreach (var entrada in tar.Entries)
+                if (entry.IsDirectory) continue;
+
+                entry.WriteToDirectory(destinationDirectory, new ExtractionOptions
                 {
-                    if (!entrada.IsDirectory)
-                    {
-                        entrada.WriteToDirectory(diretorioDestino, new ExtractionOptions
-                        {
-                            ExtractFullPath = true,
-                            Overwrite = true
-                        });
-                    }
-                }
+                    ExtractFullPath = true,
+                    Overwrite = true
+                });
             }
-
-            // excluir o arquivo .tar temporário
-            File.Delete(caminhoTar);
         }
     }
 }

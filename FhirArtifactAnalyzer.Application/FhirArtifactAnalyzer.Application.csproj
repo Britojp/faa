@@ -10,4 +10,8 @@
     <ProjectReference Include="..\FhirArtifactAnalyzer.Domain\FhirArtifactAnalyzer.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SharpCompress" Version="0.39.0" />
+  </ItemGroup>
+
 </Project>

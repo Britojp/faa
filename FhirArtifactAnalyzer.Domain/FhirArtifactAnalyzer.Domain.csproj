@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Firely.Fhir.Packages" Version="4.9.1" />
+    <PackageReference Include="Firely.Fhir.Validation" Version="2.6.5" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="5.11.4" />
+    <PackageReference Include="Hl7.Fhir.Support" Version="4.3.0" />
+  </ItemGroup>
+
 </Project>

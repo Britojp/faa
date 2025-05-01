@@ -3,8 +3,8 @@ using Hl7.Fhir.Model;
 namespace FhirArtifactAnalyzer.Domain.Abstractions
 {
 
-    public interface IFhirValidatorService<T>
+    public interface IFhirValidatorService
     {
-        OperationOutcome Validate(T input);
+        OperationOutcome Validate(string fileName);
     }
 }

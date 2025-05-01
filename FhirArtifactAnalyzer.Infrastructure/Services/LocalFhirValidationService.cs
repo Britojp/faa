@@ -5,7 +5,7 @@ using Hl7.Fhir.Serialization;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Services
 {
-    public class LocalFhirValidatorService : IFhirValidatorService<Resource>
+    public class LocalFhirValidatorService : IFhirValidatorService
     {
         private readonly string _workingDirectory;
 
@@ -25,20 +25,19 @@ namespace FhirArtifactAnalyzer.Infrastructure.Services
             }
         }
 
-        public OperationOutcome Validate(Resource resource)
+        public OperationOutcome Validate(string fileName)
         {
-            string resourcePath = Path.Combine(_workingDirectory, "resource.json");
+            string resourcePath = Path.Combine(_workingDirectory, fileName);
 
-            var json = new FhirJsonSerializer().SerializeToString(resource);
-            File.WriteAllText(resourcePath, json);
-
-            RunFirelyCommand("fhir clear");
-            RunFirelyCommand($"push resource.json");
+            RunFirelyCommand("clear");
+            RunFirelyCommand($"push {fileName}");
             RunFirelyCommand("validate --push");
         
-            string outcomePath = Path.Combine(_workingDirectory, "validation-outcome.json");
+            string outcomePath = Path.Combine(_workingDirectory, $"outcome.json");
             RunFirelyCommand($"save {outcomePath}");
         
+            RunFirelyCommand("drop");
+
             var jsonOutcome = File.ReadAllText(outcomePath);
             var parser = new FhirJsonParser();
             return parser.Parse<OperationOutcome>(jsonOutcome);

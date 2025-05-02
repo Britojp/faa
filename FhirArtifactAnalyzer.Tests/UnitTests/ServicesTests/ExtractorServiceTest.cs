@@ -5,11 +5,11 @@ using Xunit.Abstractions;
 
 namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
 {
-    public class TgzUnzipperServiceTest
+    public class ExtractorServiceTest
     {
         private readonly ITestOutputHelper _output;
 
-        public TgzUnzipperServiceTest(ITestOutputHelper output)
+        public ExtractorServiceTest(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -17,7 +17,7 @@ namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
         [Fact]
         public void Extractor_ShouldExtractTgzFileCorrectly()
         {
-            var service = new TgzUnzipperService();
+            var service = new ExtractorService();
             var testFilePath = Path.Combine("Assets", "fhir_test_bundle.tgz");
             var outputDirectory = Path.Combine("TestOutput", "extracted");
 
@@ -28,11 +28,11 @@ namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
 
             Directory.CreateDirectory(outputDirectory);
 
-            service.TgzExtractor(testFilePath, outputDirectory);
+            var extractedPath = service.Extract(testFilePath, outputDirectory);
 
-            Assert.True(Directory.Exists(outputDirectory), "Output directory was not created.");
+            Assert.True(Directory.Exists(extractedPath), "Output directory was not created.");
 
-            var extractedFiles = Directory.GetFiles(outputDirectory, "*", SearchOption.AllDirectories);
+            var extractedFiles = Directory.GetFiles(extractedPath, "*", SearchOption.AllDirectories);
 
             foreach (var file in extractedFiles)
             {

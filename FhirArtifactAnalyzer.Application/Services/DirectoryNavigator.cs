@@ -52,25 +52,27 @@ namespace FhirArtifactAnalyzer.Application.Services
             }
         }
 
-        private bool IsJsonFile(string filePath)
+        static private bool IsJsonFile(string filePath)
         {
             return Path.GetExtension(filePath).Equals(".json", StringComparison.OrdinalIgnoreCase);
         }
 
-        private bool ShouldIgnoreDirectory(string directoryPath)
+        static private bool ShouldIgnoreDirectory(string directoryPath)
         {
-            var ignoreDirectories = new[] { ".git", "node_modules" };
+            var directoriesToIgnore = new[] { ".git", "node_modules" };
             var directoryName = Path.GetFileName(directoryPath);
 
-            return ignoreDirectories.Contains(directoryName, StringComparer.OrdinalIgnoreCase);
+            return directoriesToIgnore
+                .Any(ignored => string.Equals(ignored, directoryName, StringComparison.OrdinalIgnoreCase));
         }
 
-        private bool ShouldIgnoreFile(string filePath)
+        static private bool ShouldIgnoreFile(string filePath)
         {
-            var ignoreFiles = new[] { ".exe", ".md", ".xml" };
+            var filesToIgnore = new[] { ".exe", ".md", ".xml" };
             var fileName = Path.GetFileName(filePath);
 
-            return ignoreFiles.Contains(fileName, StringComparer.OrdinalIgnoreCase);
+            return filesToIgnore
+                .Any(ignored => string.Equals(ignored, fileName, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -3,12 +3,11 @@ using Hl7.Fhir.Model;
 
 namespace FhirArtifactAnalyzer.Application.Services
 {
-
-    public class ArtifactValidation 
+    public class ArtifactValidation
     {
-        private readonly IFhirValidatorService _validator;
+        private readonly IFhirValidator _validator;
 
-        public ArtifactValidation(IFhirValidatorService validator)
+        public ArtifactValidation(IFhirValidator validator)
         {
             _validator = validator;
         }

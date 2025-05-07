@@ -1,0 +1,1 @@
+{"resourceType":"OperationOutcome","issue":[{"severity":"error","code":"invalid","details":{"coding":[{"system":"http://hl7.org/fhir/dotnet-api-operation-outcome","code":"1009"}],"text":"Value does not match pattern 'female'"},"location":["Patient.gender[0]"],"expression":["Patient.gender[0]"]}]}

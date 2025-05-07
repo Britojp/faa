@@ -4,9 +4,9 @@ using Hl7.Fhir.Serialization;
 
 namespace FhirArtifactAnalyzer.Application.Parsers
 {
-    public class XmlFhirParser : IFhirParser
+    public class JsonParserStrategy : IFhirParser
     {
-        private readonly FhirXmlParser _parser = new();
+        private readonly FhirJsonParser _parser = new();
 
         public T Parse<T>(string resource) where T : Resource
         {

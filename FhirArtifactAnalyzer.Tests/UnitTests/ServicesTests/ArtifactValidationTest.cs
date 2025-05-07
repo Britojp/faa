@@ -1,11 +1,10 @@
-using Xunit;
-using System.Text;
 using FhirArtifactAnalyzer.Application.Services;
-using FhirArtifactAnalyzer.Infrastructure.Utils;
 using FhirArtifactAnalyzer.Domain.Abstractions;
+using FhirArtifactAnalyzer.Domain.Utils;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Moq;
+using System.Text;
 
 namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
 {
@@ -15,7 +14,7 @@ namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
         [Fact]
         public void Execute_ReturnsExpectedOutcome()
         {
-            var solutionDir = SolutionPathHelper.GetSolutionDirectory();
+            var solutionDir = SolutionPathFinder.GetSolutionDirectory();
             var workingDir = Path.Combine(solutionDir, "FhirArtifactAnalyzer.ValidationArtifacts");
 
             var fhirJsonParser = new FhirJsonParser();
@@ -24,7 +23,7 @@ namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
             var resourceJson = File.ReadAllText(Path.Combine(workingDir, "mulher.json"));
             var expectedOutcomeJson = File.ReadAllText(Path.Combine(workingDir, "outcome_true_expected.json"));
 
-            var mockValidator = new Mock<IFhirValidatorService>();
+            var mockValidator = new Mock<IFhirValidator>();
 
             var resource = fhirJsonParser.Parse<Resource>(resourceJson);
             var expectedOutcome = fhirJsonParser.Parse<OperationOutcome>(expectedOutcomeJson);
@@ -46,7 +45,7 @@ namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
         [Fact]
         public void Execute_ReturnsExpectedIssues()
         {
-            var solutionDir = SolutionPathHelper.GetSolutionDirectory();
+            var solutionDir = SolutionPathFinder.GetSolutionDirectory();
             var workingDir = Path.Combine(solutionDir, "FhirArtifactAnalyzer.ValidationArtifacts");
 
             var fhirJsonParser = new FhirJsonParser();
@@ -55,7 +54,7 @@ namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
             var resourceJson = File.ReadAllText(Path.Combine(workingDir, "homem.json"));
             var expectedOutcomeJson = File.ReadAllText(Path.Combine(workingDir, "outcome_fail_expected.json"));
 
-            var mockValidator = new Mock<IFhirValidatorService>();
+            var mockValidator = new Mock<IFhirValidator>();
 
             var resource = fhirJsonParser.Parse<Resource>(resourceJson);
             var expectedOutcome = fhirJsonParser.Parse<OperationOutcome>(expectedOutcomeJson);

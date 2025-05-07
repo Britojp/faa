@@ -1,23 +1,28 @@
 using System.Diagnostics;
 using FhirArtifactAnalyzer.Domain.Abstractions;
+using FhirArtifactAnalyzer.Domain.Settings;
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Serialization;
+using Microsoft.Extensions.Options;
 
-namespace FhirArtifactAnalyzer.Infrastructure.Services
+namespace FhirArtifactAnalyzer.Domain.Validation
 {
     public class LocalFhirValidatorService : IFhirValidatorService
     {
         private readonly string _workingDirectory;
+        private readonly IFhirParserFactory _parseFactory;
 
-        public LocalFhirValidatorService(string workDirectory)
+        public LocalFhirValidatorService(IOptions<ArtifactValidationSettings> settings, IFhirParserFactory parserFactory)
         {   
-            if (!Directory.Exists(workDirectory))
-            {
-                throw new DirectoryNotFoundException($"Directory {workDirectory} not found");
-            }
+            _workingDirectory = settings.Value.WorkingDirectory ?? throw new ArgumentNullException("WorkingDirectory");
 
-            _workingDirectory = workDirectory;
+            _parseFactory = parserFactory;
+
             var manifestPath = Path.Combine(_workingDirectory, "package.json");
+
+            if (!Directory.Exists(_workingDirectory))
+            {
+                throw new DirectoryNotFoundException($"Directory {_workingDirectory} not found");
+            }
 
             if (!File.Exists(manifestPath))
             {
@@ -33,15 +38,16 @@ namespace FhirArtifactAnalyzer.Infrastructure.Services
             RunFirelyCommand($"push {fileName}");
             RunFirelyCommand("validate --push");
         
-            string outcomePath = Path.Combine(_workingDirectory, $"outcome.json");
+            string outcomePath = Path.Combine(_workingDirectory, "outcome.json");
             RunFirelyCommand($"save {outcomePath}");
         
             RunFirelyCommand("drop");
 
             var jsonOutcome = File.ReadAllText(outcomePath);
-            var parser = new FhirJsonParser();
+            var parser = _parseFactory.GetParserForFile("outcome.json");
             return parser.Parse<OperationOutcome>(jsonOutcome);
         }
+        
         private string RunFirelyCommand(string arguments)
         {
             var process = new Process

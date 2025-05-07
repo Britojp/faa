@@ -7,10 +7,7 @@ builder.Services
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructure();
-builder.Services.AddDomainServices();
-builder.Services.ConfigureGlobalOptions();
 
 var app = builder.Build();
 

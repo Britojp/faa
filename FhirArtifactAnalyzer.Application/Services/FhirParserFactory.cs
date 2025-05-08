@@ -8,9 +8,13 @@ namespace FhirArtifactAnalyzer.Application.Services
     {
         public IFhirParser GetParserForFile(string filename)
         {
-            var extension = Path.GetExtension(filename).ToLowerInvariant();
+            var extension = Path.GetExtension(filename);
+            return GetParserForFileExtension(extension);
+        }
 
-            return extension switch
+        public IFhirParser GetParserForFileExtension(string extension)
+        {
+            return extension.ToLowerInvariant() switch
             {
                 FileExtensions.Json => new JsonParserStrategy(),
                 FileExtensions.Xml => new XmlParserStrategy(),

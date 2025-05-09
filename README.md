@@ -44,8 +44,9 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 
 
 
+## Análise de Requisitos
 
-## Requisitos funcionais
+### Requisitos funcionais
 - Permitir como itens de entrada: Guias de implementação(URLs canônicas), pacotes .tgz, arquivos .zip, URLs(links diretos para arquivos ou pastas), diretórios, arquivos individuais, expressões regulares(regex)
 - Extrair e gerar metadados do ítem de entrada,para apoiar as funcionalidades de busca, validação e visualização
 - Monitorar diretórios e arquivos para sinalizar atualizações que devam refletir nos metadados
@@ -65,7 +66,7 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 - Permitir geração dos dados em tabela CSV
 - Permitir geração de gráfico visula PNG
 
-## Requisitos Não Funcionais
+### Requisitos Não Funcionais
 - Suportar até 10.000 artefatos (~50MB de dados).
 - Processamento síncrono em tempo real para indexação e consulta.
 - Garantir a integridade dos dados armazenados e processados.

@@ -80,6 +80,6 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 - Exportação de grafos em PNG.
 - Interface de linha de comando compatível com sistemas Linux, Windows e macOS.
 
-## Arquitetura da aplicação - Clean Architecture
+## Design de Software - Clean Architecture
 - A Clean Architecture é uma abordagem de design de software que prioriza a organização, manutenibilidade e testabilidade, enfatizando a separação das responsabilidades e o isolamento do domínio, alem de incorporar muitos dos princípios SOLID em sua estrutura e design. 
 

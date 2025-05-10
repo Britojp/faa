@@ -44,8 +44,9 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 
 
 
+## Análise de Requisitos
 
-## Requisitos funcionais
+### Requisitos funcionais
 - Permitir como itens de entrada: Guias de implementação(URLs canônicas), pacotes .tgz, arquivos .zip, URLs(links diretos para arquivos ou pastas), diretórios, arquivos individuais, expressões regulares(regex)
 - Extrair e gerar metadados do ítem de entrada,para apoiar as funcionalidades de busca, validação e visualização
 - Monitorar diretórios e arquivos para sinalizar atualizações que devam refletir nos metadados
@@ -65,7 +66,7 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 - Permitir geração dos dados em tabela CSV
 - Permitir geração de gráfico visula PNG
 
-## Requisitos Não Funcionais
+### Requisitos Não Funcionais
 - Suportar até 10.000 artefatos (~50MB de dados).
 - Processamento síncrono em tempo real para indexação e consulta.
 - Garantir a integridade dos dados armazenados e processados.
@@ -79,6 +80,7 @@ O FHIR Artifact Analyzer é uma ferramenta para identificar, validar e facilitar
 - Exportação de grafos em PNG.
 - Interface de linha de comando compatível com sistemas Linux, Windows e macOS.
 
-## Arquitetura da aplicação - Clean Architecture
-- A Clean Architecture é uma abordagem de design de software que prioriza a organização, manutenibilidade e testabilidade, enfatizando a separação das responsabilidades e o isolamento do domínio, alem de incorporar muitos dos princípios SOLID em sua estrutura e design. 
-
+## Arquitetura de Software - Arquitetura Monolítica
+- A arquitetura de software utilizada trata-se da Arquitetura Monolítica, em específico o monólito em camadas, que se trata de um modelo tradicional de organização de software onde a aplicação é construída como um único bloco, dividido logicamente em camadas que representam responsabilidades técnicas distintas.
+- Para aplicações web, essa arquitetura oferece diversas vantagens, especialmente em projetos de pequeno e médio porte ou em fases iniciais. Ela proporciona simplicidade no desenvolvimento e no deploy, já que toda a aplicação é executada como uma única unidade, o que reduz a complexidade de configuração e infraestrutura.
+- Além disso, está sendo utilizado o Clean Architecture como design de software para acompanhar essa abordagem arquitetural, que, por sua vez, prioriza a organização, manutenibilidade e testabilidade, enfatizando a separação das responsabilidades e o isolamento do domínio, além de incorporar muitos dos princípios SOLID em sua estrutura e design. 

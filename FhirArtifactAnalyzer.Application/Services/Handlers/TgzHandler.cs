@@ -1,10 +1,9 @@
 ﻿using FhirArtifactAnalyzer.Domain.Abstractions;
-using SharpCompress.Common;
-using System.IO.Compression;
+using FhirArtifactAnalyzer.Domain.Constants;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Tar;
-using Hl7.Fhir.Model;
-using FhirArtifactAnalyzer.Domain.Constants;
+using SharpCompress.Common;
+using System.IO.Compression;
 
 namespace FhirArtifactAnalyzer.Application.Services.Handlers
 {

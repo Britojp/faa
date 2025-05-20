@@ -1,41 +1,47 @@
 ﻿using FhirArtifactAnalyzer.Domain.Abstractions;
 using FhirArtifactAnalyzer.Domain.Models;
+using FhirArtifactAnalyzer.Infrastructure.Interfaces;
+using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
 using Raven.Client.Documents.Session;
 using System.Linq.Expressions;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions
 {
-    public abstract class Repository<TEntity>(IDocumentSession session) : IDisposable, IRepository<TEntity> where TEntity : class
+    public abstract class Repository<TEntity>(IRavenDBContext context) : IDisposable, IRepository<TEntity> where TEntity : class
     {
+        private readonly Lazy<IDocumentSession> _lazySession = new(context.OpenSession);
+
+        protected IDocumentSession Session => _lazySession.Value;
+
         public IEnumerable<TEntity> GetAll(
             Expression<Func<TEntity, bool>>? predicate = null, 
             bool disableTracking = false)
         {
-            var query = session.Query<TEntity>();
+            var query = Session.Query<TEntity>();
             
             if (disableTracking)
                 query = query.Customize(opt => opt.NoTracking());
 
             if (predicate is not null)
-                session.Query<TEntity>().Where(predicate);
+                Session.Query<TEntity>().Where(predicate);
 
             return [.. query];
         }
 
         public TEntity? Get(string? id, bool disableTracking = false)
         {
-            var entity = session.Load<TEntity>(id);
+            var entity = Session.Load<TEntity>(id);
 
             if (disableTracking)
-                session.Advanced.Evict(entity);
+                Session.Advanced.Evict(entity);
 
             return entity;
         }
 
         public TEntity? Get(Expression<Func<TEntity, bool>> predicate, bool disableTracking = false)
         {
-            var query = session.Query<TEntity>();
+            var query = Session.Query<TEntity>();
 
             if (disableTracking)
                 query = query.Customize(opt => opt.NoTracking());
@@ -45,17 +51,17 @@ namespace FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions
 
         public void Add(TEntity entity)
         {
-            session.Store(entity);
+            Session.Store(entity);
         }
 
         public void Delete(TEntity entity)
         {
-            session.Delete(entity);
+            Session.Delete(entity);
         }
 
         public AttachmentFile? GetAttachment(TEntity document, string attachmentName)
         {
-            var attachment = session.Advanced.Attachments.Get(document, attachmentName);
+            var attachment = Session.Advanced.Attachments.Get(document, attachmentName);
 
             if (attachment is null)
             {
@@ -67,17 +73,21 @@ namespace FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions
 
         public void Attach(TEntity entity, AttachmentFile file)
         {
-            session.Advanced.Attachments.Store(entity, file.Name, file.Stream, file.ContentType);
+            Session.Advanced.Attachments.Store(entity, file.Name, file.Stream, file.ContentType);
         }
 
         public void Commit()
         {
-            session.SaveChanges();
+            Session.SaveChanges();
         }
 
         public void Dispose()
         {
-            session.Dispose();
+            if (_lazySession.IsValueCreated)
+            {
+                Session.Dispose();
+            }
+
             GC.SuppressFinalize(this);
         }
     }

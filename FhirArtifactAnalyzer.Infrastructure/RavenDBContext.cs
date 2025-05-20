@@ -1,12 +1,19 @@
-﻿using Raven.Client.Documents;
+﻿using FhirArtifactAnalyzer.Infrastructure.Interfaces;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 
 namespace FhirArtifactAnalyzer.Infrastructure
 {
-    public static class DocumentStoreHolder
+    public class RavenDBContext : IRavenDBContext
     {
-        private static readonly Lazy<IDocumentStore> LazyStore = new(DefineDocumentStore);
+        private static readonly Lazy<IDocumentStore> _lazyStore = new(DefineDocumentStore);
 
-        public static IDocumentStore Store => LazyStore.Value;
+        public IDocumentStore DocumentStore => _lazyStore.Value;
+
+        public IDocumentSession OpenSession()
+        {
+            return DocumentStore.OpenSession();
+        }
 
         private static IDocumentStore DefineDocumentStore()
         {

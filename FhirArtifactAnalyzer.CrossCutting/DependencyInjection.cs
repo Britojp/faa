@@ -4,6 +4,8 @@ using FhirArtifactAnalyzer.Domain.Settings;
 using FhirArtifactAnalyzer.Domain.Utils;
 using FhirArtifactAnalyzer.Domain.Validation;
 using FhirArtifactAnalyzer.Infrastructure;
+using FhirArtifactAnalyzer.Infrastructure.Interfaces;
+using FhirArtifactAnalyzer.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FhirArtifactAnalyzer.CrossCutting
@@ -19,7 +21,8 @@ namespace FhirArtifactAnalyzer.CrossCutting
 
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            services.AddScoped(_ => DocumentStoreHolder.Store.OpenSession());
+            services.AddScoped<IRavenDBContext, RavenDBContext>();
+            services.AddScoped<FhirResourceRepository>();
 
             return services;
         }

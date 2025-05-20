@@ -22,7 +22,8 @@ namespace FhirArtifactAnalyzer.CrossCutting
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             services.AddScoped<IRavenDBContext, RavenDBContext>();
-            services.AddScoped<FhirResourceRepository>();
+            services.AddScoped<IFhirResourceRepository, FhirResourceRepository>();
+            services.AddScoped<IFhirResourceSearcher, FhirResourceSearcherWithDatabaseIndex>();
 
             return services;
         }

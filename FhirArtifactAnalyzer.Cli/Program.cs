@@ -1,25 +1,14 @@
 ﻿using FhirArtifactAnalyzer.CrossCutting;
-using FhirArtifactAnalyzer.Domain.Constants;
+using FhirArtifactAnalyzer.Domain.Abstractions;
+using FhirArtifactAnalyzer.Domain.Enums;
 using FhirArtifactAnalyzer.Domain.Models;
-using FhirArtifactAnalyzer.Infrastructure.Indexes;
-using FhirArtifactAnalyzer.Infrastructure.Repositories;
+using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using Hl7.Fhir.Model;
-using Hl7.Fhir.Rest;
 using Hl7.Fhir.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Nest;
-using Newtonsoft.Json;
-using Raven.Client.Documents;
-using Raven.Client.Documents.Indexes;
-using Raven.Client.Documents.Queries.Timings;
-using Raven.Client.Documents.Session;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Net.Mime;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 
 class Program
 {
@@ -28,11 +17,15 @@ class Program
         using var host = CreateHost(args);
         using var scope = CreateScope(host);
 
-        var session = scope.ServiceProvider.GetRequiredService<IDocumentSession>();
-        var repository = new Repository<object>(session);
+        var dbContext = scope.ServiceProvider.GetRequiredService<IRavenDBContext>();
+        var searcher = scope.ServiceProvider.GetRequiredService<IFhirResourceSearcher>();
+        var repo = scope.ServiceProvider.GetRequiredService<IFhirResourceSearcher>();
+        using var session = dbContext.OpenSession();
 
-        var path = "C:\\Users\\Iglesias\\source\\repos\\FhirArtifactAnalyzer\\FhirArtifactAnalyzer.Cli\\" +
-            "OperationDefinition.json";
+        //var path = "C:\\Users\\Iglesias\\source\\repos\\FhirArtifactAnalyzer\\FhirArtifactAnalyzer.Cli\\" +
+        //    "OperationDefinition.json";
+
+        var path = @"C:\Users\Usuario\source\repos\My-Projects\faa\FhirArtifactAnalyzer.Cli\OperationDefinition.json";
 
         var conteudoJson = File.ReadAllText(path);
         var instance = new FhirJsonParser().Parse<OperationDefinition>(conteudoJson);
@@ -59,17 +52,9 @@ class Program
         //session.Store(teste);
         //session.Advanced.Attachments.Store(teste, teste.Attachment.Name, memoryStream, MediaTypeNames.Application.Json);
         //session.SaveChanges();
-        new FhirResource_BySearchingProperties().Execute(session.Advanced.DocumentStore);
-        var buscado = session.Advanced
-            .DocumentQuery<FhirResource, FhirResource_BySearchingProperties>()
-            .Search(x => x.Comment, "labs")
-            .SelectFields<FhirResource>()
-            .FirstOrDefault();
+        var buscado = searcher.Search(new FhirResourceSearchParameters(null, "LAE", null, null, null, "fa"), true, @operator: SearchQueryOperator.Or).FirstOrDefault();
 
-        var a = session.Load<FhirResource>(buscado.Id);
-
-        var aa = session.Advanced.Attachments.Get(a, a.Attachment.Name);
-
+        
         using var reader = new StreamReader(aa.Stream, Encoding.UTF8);
         string jsonString = reader.ReadToEnd();
         var resource = new FhirJsonParser().Parse<OperationDefinition>(jsonString);

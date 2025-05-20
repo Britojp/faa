@@ -6,5 +6,9 @@
         string? TypeName,
         string? Description,
         string? Url,
-        string? Comment);
+        string? Comment)
+    {
+        public FhirResourceSearchParameters(string searchTerm) 
+            : this(null, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm) { }
+    }
 }

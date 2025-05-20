@@ -6,5 +6,13 @@
         {
             return !string.IsNullOrWhiteSpace(value);
         }
+
+        public static string WithWildcards(this string? value)
+        {
+            if (value is null) 
+                return string.Empty;
+
+            return value.Contains('*') ? value : $"*{value}*";
+        }
     }
 }

@@ -1,46 +1,44 @@
-﻿using FhirArtifactAnalyzer.Domain.Models;
+﻿using FhirArtifactAnalyzer.Domain.Abstractions;
+using FhirArtifactAnalyzer.Domain.Extensions;
+using FhirArtifactAnalyzer.Domain.Models;
 using FhirArtifactAnalyzer.Infrastructure.Indexes;
+using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions;
-using Raven.Client.Documents.Session;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Repositories
 {
-    public class FhirResourceRepository : Repository<FhirResource>
+    public class FhirResourceRepository : Repository<FhirResource>, IFhirResourceSearcherStrategy
     {
-        private readonly IDocumentSession _session;
-
-        public FhirResourceRepository(IDocumentSession session) : base(session)
+        public FhirResourceRepository(IRavenDBContext context) : base(context)
         {
-            _session = session;
             CreateIndexes();
         }
 
         public IEnumerable<FhirResource> Search(FhirResourceSearchParameters parameters)
         {
-            throw new NotImplementedException();
-        }
+            var query = Session.Advanced.DocumentQuery<FhirResource, FhirResource_BySearchingProperties>();
 
-        public IEnumerable<FhirResource> Search(string searchTerm)
-        {
-            var query = _session
-                .Advanced
-                .DocumentQuery<FhirResource, FhirResource_BySearchingProperties>()
-                .Search(x => x.Name, searchTerm)
-                .OrElse()
-                .Search(x => x.TypeName, searchTerm)
-                .OrElse()
-                .Search(x => x.Description, searchTerm)
-                .OrElse()
-                .Search(x => x.Url, searchTerm)
-                .OrElse()
-                .Search(x => x.Comment, searchTerm);
+            if (parameters.Name.HasValue())
+                query.Search(x => x.Name, parameters.Name);
 
-            return query.ToList();
+            if (parameters.TypeName.HasValue())
+                query.Search(x => x.TypeName, parameters.TypeName);
+
+            if (parameters.Description.HasValue())
+                query.Search(x => x.Description, parameters.Description);
+
+            if (parameters.Url.HasValue())
+                query.Search(x => x.Url, parameters.Url);
+
+            if (parameters.Comment.HasValue())
+                query.Search(x => x.Comment, parameters.Comment);
+
+            return query.ToArray();
         }
 
         private void CreateIndexes()
         {
-            new FhirResource_BySearchingProperties().Execute(_session.Advanced.DocumentStore);
+            new FhirResource_BySearchingProperties().Execute(Session.Advanced.DocumentStore);
         }
     }
 }

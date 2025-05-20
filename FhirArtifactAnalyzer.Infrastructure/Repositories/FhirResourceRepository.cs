@@ -1,37 +1,59 @@
 ﻿using FhirArtifactAnalyzer.Domain.Abstractions;
+using FhirArtifactAnalyzer.Domain.Enums;
 using FhirArtifactAnalyzer.Domain.Extensions;
 using FhirArtifactAnalyzer.Domain.Models;
 using FhirArtifactAnalyzer.Infrastructure.Indexes;
 using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions;
+using Raven.Client.Documents.Queries;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Repositories
 {
-    public class FhirResourceRepository : Repository<FhirResource>, IFhirResourceSearcherStrategy
+    public class FhirResourceRepository : Repository<FhirResource>, IFhirResourceRepository
     {
         public FhirResourceRepository(IRavenDBContext context) : base(context)
         {
             CreateIndexes();
         }
 
-        public IEnumerable<FhirResource> Search(FhirResourceSearchParameters parameters)
+        public IEnumerable<FhirResource> Search(FhirResourceSearchParameters parameters, SearchQueryOperator @operator = SearchQueryOperator.Or)
         {
             var query = Session.Advanced.DocumentQuery<FhirResource, FhirResource_BySearchingProperties>();
 
+            var useAndOperator = @operator == SearchQueryOperator.And;
+
             if (parameters.Name.HasValue())
-                query.Search(x => x.Name, parameters.Name);
+            {
+                query.Search(resource => resource.Name, parameters.Name);
+                
+                if (useAndOperator) query.AndAlso();
+            }
 
             if (parameters.TypeName.HasValue())
-                query.Search(x => x.TypeName, parameters.TypeName);
+            {
+                query.Search(resource => resource.TypeName, parameters.TypeName);
+                
+                if (useAndOperator) query.AndAlso();
+            }
 
             if (parameters.Description.HasValue())
-                query.Search(x => x.Description, parameters.Description);
+            {
+                query.Search(resource => resource.Description, parameters.Description);
+                
+                if (useAndOperator) query.AndAlso();
+            }
 
             if (parameters.Url.HasValue())
-                query.Search(x => x.Url, parameters.Url);
+            {
+                query.Search(resource => resource.Url, parameters.Url);
+                
+                if (useAndOperator) query.AndAlso();
+            }
 
             if (parameters.Comment.HasValue())
-                query.Search(x => x.Comment, parameters.Comment);
+            {
+                query.Search(resource => resource.Comment, parameters.Comment);
+            }
 
             return query.ToArray();
         }

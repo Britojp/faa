@@ -1,0 +1,51 @@
+@inherits LayoutComponentBase
+
+<div class="main">
+    <div class="d-flex">
+        <div class="content flex-grow-1 p-4">
+            @Body
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool _sidebarExpanded = true;
+    
+    private void ToggleSidebar()
+    {
+        _sidebarExpanded = !_sidebarExpanded;
+    }
+}
+
+<style>
+    .main {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+    
+    .sidebar {
+        width: 250px;
+        transition: all 0.3s;
+        height: calc(100vh - 56px);
+        overflow-y: auto;
+    }
+    
+    .sidebar.collapsed {
+        width: 0;
+        overflow: hidden;
+    }
+    
+    .content {
+        height: calc(100vh - 56px);
+        overflow-y: auto;
+    }
+    
+    @@media (max-width: 768px) {
+        .sidebar.expanded {
+            position: absolute;
+            z-index: 1000;
+            height: calc(100vh - 56px);
+        }
+    }
+</style>

@@ -1,0 +1,89 @@
+@inject ExportService ExportService
+@inject IJSRuntime JSRuntime
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Export Data</h5>
+    </div>
+    <div class="card-body">
+        <p class="mb-3">Export the analyzed FHIR artifacts in various formats</p>
+        
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-primary" 
+                    @onclick="ExportJson"
+                    disabled="@(!Resources.Any())">
+                <i class="bi bi-download me-2"></i>
+                Export as JSON
+            </button>
+            
+            <button type="button" class="btn btn-success" 
+                    @onclick="ExportCsv"
+                    disabled="@(!Resources.Any())">
+                <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                Export as CSV
+            </button>
+            
+            <button type="button" class="btn btn-info" 
+                    @onclick="ExportGraph"
+                    disabled="@(!Resources.Any())">
+                <i class="bi bi-image me-2"></i>
+                Export Graph as PNG
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .gap-2 {
+        gap: 0.5rem;
+    }
+</style>
+
+@code {
+    [Parameter] public List<FhirResource> Resources { get; set; } = new List<FhirResource>();
+    
+    private async Task ExportJson()
+    {
+        try
+        {
+            if (Resources.Any())
+            {
+                await ExportService.ExportToJsonAsync(Resources);
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error exporting JSON: {ex.Message}");
+        }
+    }
+    
+    private async Task ExportCsv()
+    {
+        try
+        {
+            if (Resources.Any())
+            {
+                await ExportService.ExportToCsvAsync(Resources);
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error exporting CSV: {ex.Message}");
+        }
+    }
+    
+    private async Task ExportGraph()
+    {
+        try
+        {
+            if (Resources.Any())
+            {
+                await ExportService.ExportGraphToPngAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error exporting graph: {ex.Message}");
+        }
+    }
+}

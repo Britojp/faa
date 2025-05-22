@@ -16,9 +16,12 @@ class Program
     {
         return Host
             .CreateDefaultBuilder(args)
-            .ConfigureServices((context, services) =>
+            .ConfigureServices((_, services) =>
             {
+                services.AddApplicationServices();
                 services.AddInfrastructure();
+                services.AddDomainServices();
+                services.ConfigureGlobalOptions();
             })
             .Build();
     }

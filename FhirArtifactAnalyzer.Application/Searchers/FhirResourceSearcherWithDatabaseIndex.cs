@@ -3,7 +3,7 @@ using FhirArtifactAnalyzer.Domain.Enums;
 using FhirArtifactAnalyzer.Domain.Extensions;
 using FhirArtifactAnalyzer.Domain.Models;
 
-namespace FhirArtifactAnalyzer.Application.Services
+namespace FhirArtifactAnalyzer.Application.Searchers
 {
     public class FhirResourceSearcherWithDatabaseIndex : IFhirResourceSearcher
     {

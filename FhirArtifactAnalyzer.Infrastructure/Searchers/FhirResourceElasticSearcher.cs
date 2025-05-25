@@ -1,9 +1,9 @@
-﻿using Elasticsearch.Net;
-using FhirArtifactAnalyzer.Domain.Abstractions;
+﻿using FhirArtifactAnalyzer.Domain.Abstractions;
 using FhirArtifactAnalyzer.Domain.Enums;
 using FhirArtifactAnalyzer.Domain.Extensions;
 using FhirArtifactAnalyzer.Domain.Models;
 using Nest;
+using System.Linq.Expressions;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Searchers
 {
@@ -18,8 +18,8 @@ namespace FhirArtifactAnalyzer.Infrastructure.Searchers
 
         public IEnumerable<FhirResource> Search(
             FhirResourceSearchParameters parameters,
-            bool enableSubstringSearch = false,
-            SearchQueryOperator @operator = SearchQueryOperator.Or)
+            SearchQueryOperator @operator = SearchQueryOperator.Or,
+            bool enableSubstringSearch = false)
         {
             if (enableSubstringSearch)
                 parameters = parameters.WithWildcards();
@@ -27,64 +27,19 @@ namespace FhirArtifactAnalyzer.Infrastructure.Searchers
             var queries = new List<Func<QueryContainerDescriptor<FhirResource>, QueryContainer>>();
 
             if (parameters.Name.HasValue())
-            {
-                queries.Add(q =>
-                    enableSubstringSearch
-                    ? q.Wildcard(w => w
-                        .Field(f => f.Name)
-                        .Value(parameters.Name))
-                    : q.Match(m => m
-                        .Field(f => f.Name)
-                        .Query(parameters.Name)));
-            }
+                queries.Add(BuildQueryByProperty(f => f.Name, parameters.Name!, enableSubstringSearch));
 
             if (parameters.TypeName.HasValue())
-            {
-                queries.Add(q =>
-                    enableSubstringSearch
-                    ? q.Wildcard(w => w
-                        .Field(f => f.TypeName)
-                        .Value(parameters.TypeName))
-                    : q.Match(m => m
-                        .Field(f => f.TypeName)
-                        .Query(parameters.TypeName)));
-            }
+                queries.Add(BuildQueryByProperty(f => f.TypeName, parameters.TypeName!, enableSubstringSearch));
 
             if (parameters.Description.HasValue())
-            {
-                queries.Add(q =>
-                    enableSubstringSearch
-                    ? q.Wildcard(w => w
-                        .Field(f => f.Description)
-                        .Value(parameters.Description))
-                    : q.Match(m => m
-                        .Field(f => f.Description)
-                        .Query(parameters.Description)));
-            }
+                queries.Add(BuildQueryByProperty(f => f.Description, parameters.Description!, enableSubstringSearch));
 
             if (parameters.Url.HasValue())
-            {
-                queries.Add(q =>
-                    enableSubstringSearch
-                    ? q.Wildcard(w => w
-                        .Field(f => f.Url)
-                        .Value(parameters.Url))
-                    : q.Match(m => m
-                        .Field(f => f.Url)
-                        .Query(parameters.Url)));
-            }
+                queries.Add(BuildQueryByProperty(f => f.Url, parameters.Url!, enableSubstringSearch));
 
             if (parameters.Comment.HasValue())
-            {
-                queries.Add(q =>
-                    enableSubstringSearch
-                    ? q.Wildcard(w => w
-                        .Field(f => f.Comment)
-                        .Value(parameters.Comment))
-                    : q.Match(m => m
-                        .Field(f => f.Comment)
-                        .Query(parameters.Comment)));
-            }
+                queries.Add(BuildQueryByProperty(f => f.Comment, parameters.Comment!, enableSubstringSearch));
 
             var searchRequest = new SearchDescriptor<FhirResource>()
                 .Query(q => q
@@ -127,6 +82,31 @@ namespace FhirArtifactAnalyzer.Infrastructure.Searchers
             }
 
             return searchResponse.Documents;
+        }
+
+        private static Func<QueryContainerDescriptor<FhirResource>, QueryContainer> BuildQueryByProperty(
+            Expression<Func<FhirResource, string?>> property,
+            string value,
+            bool enableSubstringSearch)
+        {
+            Func<QueryContainerDescriptor<FhirResource>, QueryContainer> query;
+
+            if (enableSubstringSearch)
+            {
+                query = (q) => q
+                    .Wildcard(w => w
+                        .Field(property)
+                        .Value(value));
+            }
+            else
+            {
+                query = (q) => q
+                    .Match(m => m
+                        .Field(property)
+                        .Query(value));
+            }
+
+            return query;
         }
     }
 }

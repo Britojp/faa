@@ -1,6 +1,4 @@
 ﻿using Elasticsearch.Net;
-using FhirArtifactAnalyzer.Domain.Abstractions;
-using FhirArtifactAnalyzer.Domain.Enums;
 using FhirArtifactAnalyzer.Domain.Models;
 using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using FhirArtifactAnalyzer.Infrastructure.Repositories;
@@ -9,14 +7,14 @@ using System.Linq.Expressions;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Proxies
 {
-    public class FhirResourceElasticSyncRepository : IFhirResourceRepository
+    public class FhirResourceElasticSyncRepository : Domain.Abstractions.IRepository<FhirResource>
     {
-        private readonly FhirResourceRepository _repository;
+        private readonly Repository<FhirResource> _repository;
         private readonly ElasticClient _client;
 
         public FhirResourceElasticSyncRepository(IRavenDBContext context, ElasticClient elasticClient)
         {
-            _repository = new FhirResourceRepository(context);
+            _repository = new Repository<FhirResource>(context);
             _client = elasticClient;
         }
 
@@ -60,11 +58,6 @@ namespace FhirArtifactAnalyzer.Infrastructure.Proxies
         public AttachmentFile? GetAttachment(string documentId, string attachmentName)
         {
             return _repository.GetAttachment(documentId, attachmentName);
-        }
-
-        public IEnumerable<FhirResource> Search(FhirResourceSearchParameters parameters, SearchQueryOperator @operator = SearchQueryOperator.Or)
-        {
-            return _repository.Search(parameters, @operator);
         }
 
         public void Update(string id, FhirResource entity)

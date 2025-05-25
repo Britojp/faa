@@ -5,11 +5,21 @@ namespace FhirArtifactAnalyzer.Domain.Abstractions
 {
     public interface IFhirResourceSearcher
     {
+        /// <summary>
+        /// Searches for FHIR resources based on the provided search parameters.
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         IEnumerable<FhirResource> Search(
             FhirResourceSearchParameters parameters,
-            bool enableSubstringSearch = false,
-            SearchQueryOperator @operator = SearchQueryOperator.Or);
+            SearchQueryOperator @operator = SearchQueryOperator.Or,
+            bool enableSubstringSearch = false);
 
+        /// <summary>
+        /// Searches for FHIR resources based on the provided search term.
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         IEnumerable<FhirResource> Search(string searchTerm, bool enableSubstringSearch = false);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using FhirArtifactAnalyzer.Application.Services;
 using FhirArtifactAnalyzer.Domain.Abstractions;
+using FhirArtifactAnalyzer.Domain.Models;
 using FhirArtifactAnalyzer.Domain.Settings;
 using FhirArtifactAnalyzer.Domain.Utils;
 using FhirArtifactAnalyzer.Domain.Validation;
@@ -7,7 +8,6 @@ using FhirArtifactAnalyzer.Infrastructure;
 using FhirArtifactAnalyzer.Infrastructure.Configuration;
 using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using FhirArtifactAnalyzer.Infrastructure.Proxies;
-using FhirArtifactAnalyzer.Infrastructure.Repositories;
 using FhirArtifactAnalyzer.Infrastructure.Searchers;
 using FhirArtifactAnalyzer.Infrastructure.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +39,7 @@ namespace FhirArtifactAnalyzer.CrossCutting
             });
 
             services.AddScoped<IRavenDBContext, RavenDBContext>();
-            services.AddScoped<IFhirResourceRepository, FhirResourceElasticSyncRepository>();
+            services.AddScoped<Domain.Abstractions.IRepository<FhirResource>, FhirResourceElasticSyncRepository>();
             services.AddScoped<IFhirResourceSearcher, FhirResourceElasticSearcher>();
 
             return services;

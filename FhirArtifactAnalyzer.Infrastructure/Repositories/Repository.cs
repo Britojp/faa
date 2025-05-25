@@ -6,13 +6,13 @@ using Raven.Client.Documents.Linq;
 using Raven.Client.Documents.Session;
 using System.Linq.Expressions;
 
-namespace FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions
+namespace FhirArtifactAnalyzer.Infrastructure.Repositories
 {
-    public abstract class Repository<TEntity>(IRavenDBContext context) : IDisposable, IRepository<TEntity> where TEntity : class
+    public sealed class Repository<TEntity>(IRavenDBContext context) : IDisposable, IRepository<TEntity> where TEntity : class
     {
-        private readonly Lazy<IDocumentSession> _lazySession = new(context.OpenSession);
+        private readonly Lazy<IDocumentSession> _lazySession = new(context.DocumentStore.OpenSession);
 
-        protected IDocumentSession Session => _lazySession.Value;
+        private IDocumentSession Session => _lazySession.Value;
 
         public IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>>? predicate = null)
         {

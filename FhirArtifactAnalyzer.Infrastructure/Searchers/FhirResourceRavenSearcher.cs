@@ -3,13 +3,13 @@ using FhirArtifactAnalyzer.Domain.Enums;
 using FhirArtifactAnalyzer.Domain.Extensions;
 using FhirArtifactAnalyzer.Domain.Models;
 
-namespace FhirArtifactAnalyzer.Application.Searchers
+namespace FhirArtifactAnalyzer.Infrastructure.Searchers
 {
-    public class FhirResourceSearcherWithDatabaseIndex : IFhirResourceSearcher
+    public class FhirResourceRavenSearcher : IFhirResourceSearcher
     {
         private readonly IFhirResourceRepository _resourceRepository;
 
-        public FhirResourceSearcherWithDatabaseIndex(IFhirResourceRepository resourceRepository)
+        public FhirResourceRavenSearcher(IFhirResourceRepository resourceRepository)
         {
             _resourceRepository = resourceRepository;
         }
@@ -20,16 +20,7 @@ namespace FhirArtifactAnalyzer.Application.Searchers
             SearchQueryOperator @operator = SearchQueryOperator.Or)
         {
             if (enableSubstringSearch)
-            {
-                parameters = parameters with
-                {
-                    Name = parameters.Name.WithWildcards(),
-                    TypeName = parameters.TypeName.WithWildcards(),
-                    Description = parameters.Description.WithWildcards(),
-                    Url = parameters.Url.WithWildcards(),
-                    Comment = parameters.Comment.WithWildcards(),
-                };
-            }
+                parameters = parameters.WithWildcards();
 
             return _resourceRepository.Search(parameters, @operator);
         }
@@ -37,9 +28,7 @@ namespace FhirArtifactAnalyzer.Application.Searchers
         public IEnumerable<FhirResource> Search(string searchTerm, bool enableSubstringSearch = false)
         {
             if (enableSubstringSearch)
-            {
                 searchTerm = searchTerm.WithWildcards();
-            }
 
             return _resourceRepository.Search(new FhirResourceSearchParameters(searchTerm));
         }

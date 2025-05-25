@@ -1,12 +1,15 @@
-﻿using FhirArtifactAnalyzer.Application.Searchers;
-using FhirArtifactAnalyzer.Application.Services;
+﻿using FhirArtifactAnalyzer.Application.Services;
 using FhirArtifactAnalyzer.Domain.Abstractions;
 using FhirArtifactAnalyzer.Domain.Settings;
 using FhirArtifactAnalyzer.Domain.Utils;
 using FhirArtifactAnalyzer.Domain.Validation;
 using FhirArtifactAnalyzer.Infrastructure;
+using FhirArtifactAnalyzer.Infrastructure.Configuration;
 using FhirArtifactAnalyzer.Infrastructure.Interfaces;
+using FhirArtifactAnalyzer.Infrastructure.Proxies;
 using FhirArtifactAnalyzer.Infrastructure.Repositories;
+using FhirArtifactAnalyzer.Infrastructure.Searchers;
+using FhirArtifactAnalyzer.Infrastructure.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Nest;
 
@@ -17,28 +20,27 @@ namespace FhirArtifactAnalyzer.CrossCutting
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IFhirParserFactory, FhirParserFactory>();
-            services.AddScoped<IFhirResourceSearcher, FhirResourceSearcherWithDatabaseIndex>();
-
-            services.AddScoped(_ => 
-            {
-                var defaultIndexName = Environment.GetEnvironmentVariable("ELASTICSEARCH_DEFAULT_INDEX_NAME")
-                    ?? throw new ArgumentException("Environment variable 'ELASTICSEARCH_URI' not set.");
-
-                var uri = Environment.GetEnvironmentVariable("ELASTICSEARCH_URI") 
-                    ?? throw new ArgumentException("Environment variable 'ELASTICSEARCH_URI' not set.");
-                
-                var settings = new ConnectionSettings(new Uri(uri)).DefaultIndex(defaultIndexName);
-                
-                return new ElasticClient(settings);
-            });
 
             return services;
         }
 
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
+            services.AddScoped(_ =>
+            {
+                var uri = new Uri(ElasticSearchConfiguration.Uri);
+                var settings = new ConnectionSettings(uri)
+                    .DefaultIndex(ElasticSearchConfiguration.DefaultIndexName);
+
+                var client = new ElasticClient(settings);
+                ElasticSearchInitializer.EnsureIndexExists(client);
+
+                return client;
+            });
+
             services.AddScoped<IRavenDBContext, RavenDBContext>();
-            services.AddScoped<IFhirResourceRepository, FhirResourceRepository>();
+            services.AddScoped<IFhirResourceRepository, FhirResourceElasticSyncRepository>();
+            services.AddScoped<IFhirResourceSearcher, FhirResourceElasticSearcher>();
 
             return services;
         }

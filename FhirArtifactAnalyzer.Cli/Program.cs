@@ -2,7 +2,6 @@
 using FhirArtifactAnalyzer.Domain.Abstractions;
 using FhirArtifactAnalyzer.Domain.Enums;
 using FhirArtifactAnalyzer.Domain.Models;
-using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +18,7 @@ class Program
         using var scope = CreateScope(host);
 
         var searcher = scope.ServiceProvider.GetRequiredService<IFhirResourceSearcher>();
+        var repository = scope.ServiceProvider.GetRequiredService<IFhirResourceRepository>();
 
         var path = "C:\\Users\\Iglesias\\source\\repos\\FhirArtifactAnalyzer\\FhirArtifactAnalyzer.Cli\\" +
             "OperationDefinition.json";
@@ -44,29 +44,7 @@ class Program
             Comment = instance.Comment,
             TypeName = instance.TypeName,
             Attachment = new(instance.Id + ".json", MediaTypeNames.Application.Json)
-
         };
-
-        var buscado = searcher.Search(new FhirResourceSearchParameters(null, "LAE", null, null, null, "fa"), true, @operator: SearchQueryOperator.Or).FirstOrDefault();
-        
-        var settings = new ConnectionSettings(new Uri("http://localhost:9200"))
-            .DefaultIndex("recursos");
-
-        var client = new ElasticClient(settings);
-
-        // 1. Indexar um documento
-        var indexResponse = client.IndexDocument(teste);
-        Console.WriteLine("Indexado? " + indexResponse.IsValid);
-
-        // 2. Buscar por título
-        var searchResponse = client.Search<FhirResource>(s => s
-            .Query(q => q
-                .Match(m => m
-                    .Field(f => f.Comment)
-                    .Query("labs")
-                )
-            )
-        );
     }
 
     private static IHost CreateHost(string[] args)

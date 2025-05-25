@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="RavenDB.Client" Version="7.0.1" />
   </ItemGroup>
 

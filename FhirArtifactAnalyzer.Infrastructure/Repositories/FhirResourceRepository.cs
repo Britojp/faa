@@ -5,7 +5,7 @@ using FhirArtifactAnalyzer.Domain.Models;
 using FhirArtifactAnalyzer.Infrastructure.Indexes;
 using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions;
-using Raven.Client.Documents.Queries;
+using Raven.Client.Documents.Indexes;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Repositories
 {
@@ -13,7 +13,7 @@ namespace FhirArtifactAnalyzer.Infrastructure.Repositories
     {
         public FhirResourceRepository(IRavenDBContext context) : base(context)
         {
-            CreateIndexes();
+            CreateIndexes(context);
         }
 
         public IEnumerable<FhirResource> Search(FhirResourceSearchParameters parameters, SearchQueryOperator @operator = SearchQueryOperator.Or)
@@ -58,9 +58,16 @@ namespace FhirArtifactAnalyzer.Infrastructure.Repositories
             return query.ToArray();
         }
 
-        private void CreateIndexes()
+        private static void CreateIndexes(IRavenDBContext context)
         {
-            new FhirResource_BySearchingProperties().Execute(Session.Advanced.DocumentStore);
+            var store = context.DocumentStore;
+
+            var indexesToCreate = new List<AbstractIndexCreationTask>
+            {
+                new FhirResource_BySearchingProperties()
+            };
+
+            store.ExecuteIndexes(indexesToCreate, store.Database);
         }
     }
 }

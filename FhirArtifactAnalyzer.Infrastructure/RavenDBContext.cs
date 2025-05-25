@@ -1,4 +1,5 @@
-﻿using FhirArtifactAnalyzer.Infrastructure.Interfaces;
+﻿using FhirArtifactAnalyzer.Infrastructure.Configuration;
+using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 
@@ -10,21 +11,15 @@ namespace FhirArtifactAnalyzer.Infrastructure
 
         public IDocumentStore DocumentStore => _lazyStore.Value;
 
-        public IDocumentSession OpenSession()
-        {
-            return DocumentStore.OpenSession();
-        }
+        public IDocumentSession OpenSession() => DocumentStore.OpenSession();
 
         private static IDocumentStore DefineDocumentStore()
         {
-            var databaseName = Environment.GetEnvironmentVariable("RAVENDB_DATABASE_NAME");
-            var databaseUrl = Environment.GetEnvironmentVariable("RAVENDB_URL");
-
             var store = new DocumentStore
             {
-                Urls = [databaseUrl],
-                Database = databaseName,
-                Certificate = null,
+                Urls = [RavenConfiguration.Url],
+                Database = RavenConfiguration.DatabaseName,
+                Certificate = RavenConfiguration.Certificate,
             };
 
             return store.Initialize();

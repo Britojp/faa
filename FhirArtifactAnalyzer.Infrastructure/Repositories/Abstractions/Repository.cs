@@ -14,37 +14,26 @@ namespace FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions
 
         protected IDocumentSession Session => _lazySession.Value;
 
-        public IEnumerable<TEntity> GetAll(
-            Expression<Func<TEntity, bool>>? predicate = null, 
-            bool disableTracking = false)
+        public IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>>? predicate = null)
         {
-            var query = Session.Query<TEntity>();
-            
-            if (disableTracking)
-                query = query.Customize(opt => opt.NoTracking());
+            var query = Session.Query<TEntity>().Customize(c => c.NoTracking());
 
             if (predicate is not null)
-                Session.Query<TEntity>().Where(predicate);
+                query = query.Where(predicate);
 
             return [.. query];
         }
 
-        public TEntity? Get(string? id, bool disableTracking = false)
+        public TEntity? Get(string id)
         {
             var entity = Session.Load<TEntity>(id);
-
-            if (disableTracking)
-                Session.Advanced.Evict(entity);
-
+            Session.Advanced.Evict(entity);
             return entity;
         }
 
-        public TEntity? Get(Expression<Func<TEntity, bool>> predicate, bool disableTracking = false)
+        public TEntity? Get(Expression<Func<TEntity, bool>> predicate)
         {
-            var query = Session.Query<TEntity>();
-
-            if (disableTracking)
-                query = query.Customize(opt => opt.NoTracking());
+            var query = Session.Query<TEntity>().Customize(opt => opt.NoTracking());
 
             return query.Where(predicate).FirstOrDefault();
         }
@@ -54,13 +43,19 @@ namespace FhirArtifactAnalyzer.Infrastructure.Repositories.Abstractions
             Session.Store(entity);
         }
 
+        public void Update(string id, TEntity entity)
+        {
+            Session.Store(entity, id);
+        }
+
         public void Delete(TEntity entity)
         {
             Session.Delete(entity);
         }
 
-        public AttachmentFile? GetAttachment(TEntity document, string attachmentName)
+        public AttachmentFile? GetAttachment(string documentId, string attachmentName)
         {
+            var document = Session.Load<TEntity>(documentId);
             var attachment = Session.Advanced.Attachments.Get(document, attachmentName);
 
             if (attachment is null)

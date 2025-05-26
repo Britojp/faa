@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Repositories
 {
-    public sealed class Repository<TEntity>(IRavenDBContext context) : IDisposable, IRepository<TEntity> where TEntity : class
+    public sealed class Repository<TEntity>(IRavenContext context) : IDisposable, IRepository<TEntity> where TEntity : class, IEntity
     {
         private readonly Lazy<IDocumentSession> _lazySession = new(context.DocumentStore.OpenSession);
 

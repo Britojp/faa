@@ -4,7 +4,7 @@ using Raven.Client.Documents;
 
 namespace FhirArtifactAnalyzer.Infrastructure
 {
-    public class RavenDBContext : IRavenDBContext
+    public class RavenContext : IRavenContext
     {
         private static readonly Lazy<IDocumentStore> _lazyStore = new(DefineDocumentStore);
 

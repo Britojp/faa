@@ -10,9 +10,9 @@ namespace FhirArtifactAnalyzer.Infrastructure.Searchers
 {
     public class FhirResourceRavenSearcher : IFhirResourceSearcher
     {
-        private readonly IRavenDBContext _dbContext;
+        private readonly IRavenContext _dbContext;
 
-        public FhirResourceRavenSearcher(IRavenDBContext dbContext)
+        public FhirResourceRavenSearcher(IRavenContext dbContext)
         {
             _dbContext = dbContext;
             CreateIndex();

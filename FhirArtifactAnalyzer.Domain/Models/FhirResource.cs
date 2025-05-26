@@ -1,6 +1,8 @@
-﻿namespace FhirArtifactAnalyzer.Domain.Models
+﻿using FhirArtifactAnalyzer.Domain.Abstractions;
+
+namespace FhirArtifactAnalyzer.Domain.Models
 {
-    public class FhirResource
+    public class FhirResource : IEntity
     {
         public required string Id { get; init; }
         public required string Name { get; set; }

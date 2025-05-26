@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace FhirArtifactAnalyzer.Domain.Abstractions
 {
-    public interface IRepository<TEntity> where TEntity : class
+    public interface IRepository<TEntity> where TEntity : class, IEntity
     {
         IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>>? predicate = null);
         TEntity? Get(Expression<Func<TEntity, bool>> predicate);

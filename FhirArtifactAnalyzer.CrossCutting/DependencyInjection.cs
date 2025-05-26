@@ -26,20 +26,20 @@ namespace FhirArtifactAnalyzer.CrossCutting
 
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            services.AddScoped(_ =>
+            services.AddScoped<IElasticClient>(_ =>
             {
                 var uri = new Uri(ElasticSearchConfiguration.Uri);
                 var settings = new ConnectionSettings(uri)
                     .DefaultIndex(ElasticSearchConfiguration.DefaultIndexName);
 
                 var client = new ElasticClient(settings);
-                ElasticSearchInitializer.EnsureIndexExists(client);
+                ElasticSearchIndexInitializer.EnsureIndexExists(client, ElasticSearchConfiguration.DefaultIndexName);
 
                 return client;
             });
 
-            services.AddScoped<IRavenDBContext, RavenDBContext>();
-            services.AddScoped<Domain.Abstractions.IRepository<FhirResource>, FhirResourceElasticSyncRepository>();
+            services.AddScoped<IRavenContext, RavenContext>();
+            services.AddScoped<Domain.Abstractions.IRepository<FhirResource>, ElasticSyncRepository<FhirResource>>();
             services.AddScoped<IFhirResourceSearcher, FhirResourceElasticSearcher>();
 
             return services;

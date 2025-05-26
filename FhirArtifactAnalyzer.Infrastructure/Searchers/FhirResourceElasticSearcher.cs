@@ -9,9 +9,9 @@ namespace FhirArtifactAnalyzer.Infrastructure.Searchers
 {
     public class FhirResourceElasticSearcher : IFhirResourceSearcher
     {
-        private readonly ElasticClient _client;
+        private readonly IElasticClient _client;
 
-        public FhirResourceElasticSearcher(ElasticClient client)
+        public FhirResourceElasticSearcher(IElasticClient client)
         {
             _client = client;
         }

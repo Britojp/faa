@@ -1,4 +1,5 @@
 ﻿using Elasticsearch.Net;
+using FhirArtifactAnalyzer.Domain.Abstractions;
 using FhirArtifactAnalyzer.Domain.Models;
 using FhirArtifactAnalyzer.Infrastructure.Interfaces;
 using FhirArtifactAnalyzer.Infrastructure.Repositories;
@@ -7,24 +8,24 @@ using System.Linq.Expressions;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Proxies
 {
-    public class FhirResourceElasticSyncRepository : Domain.Abstractions.IRepository<FhirResource>
+    public sealed class ElasticSyncRepository<T> : Domain.Abstractions.IRepository<T> where T : class, IEntity
     {
-        private readonly Repository<FhirResource> _repository;
-        private readonly ElasticClient _client;
+        private readonly Repository<T> _repository;
+        private readonly IElasticClient _client;
 
-        public FhirResourceElasticSyncRepository(IRavenDBContext context, ElasticClient elasticClient)
+        public ElasticSyncRepository(IRavenContext context, IElasticClient elasticClient)
         {
-            _repository = new Repository<FhirResource>(context);
+            _repository = new Repository<T>(context);
             _client = elasticClient;
         }
 
-        public void Add(FhirResource entity)
+        public void Add(T entity)
         {
             _repository.Add(entity);
             _client.IndexDocument(entity);
         }
 
-        public void Attach(FhirResource entity, AttachmentFile file)
+        public void Attach(T entity, AttachmentFile file)
         {
             _repository.Attach(entity, file);
         }
@@ -34,23 +35,23 @@ namespace FhirArtifactAnalyzer.Infrastructure.Proxies
             _repository.Commit();
         }
 
-        public void Delete(FhirResource entity)
+        public void Delete(T entity)
         {
             _repository.Delete(entity);
-            _client.Delete<FhirResource>(entity.Id, d => d.Refresh(Refresh.True));
+            _client.Delete<T>(entity.Id, d => d.Refresh(Refresh.True));
         }
 
-        public FhirResource? Get(Expression<Func<FhirResource, bool>> predicate)
+        public T? Get(Expression<Func<T, bool>> predicate)
         {
             return _repository.Get(predicate);
         }
 
-        public FhirResource? Get(string id)
+        public T? Get(string id)
         {
             return _repository.Get(id);
         }
 
-        public IEnumerable<FhirResource> GetAll(Expression<Func<FhirResource, bool>>? predicate = null)
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? predicate = null)
         {
             return _repository.GetAll(predicate);
         }
@@ -60,10 +61,10 @@ namespace FhirArtifactAnalyzer.Infrastructure.Proxies
             return _repository.GetAttachment(documentId, attachmentName);
         }
 
-        public void Update(string id, FhirResource entity)
+        public void Update(string id, T entity)
         {
             _repository.Update(id, entity);
-            _client.Update<FhirResource>(id, u => u.Doc(entity).Refresh(Refresh.True));
+            _client.Update<T>(id, u => u.Doc(entity).Refresh(Refresh.True));
         }
     }
 }

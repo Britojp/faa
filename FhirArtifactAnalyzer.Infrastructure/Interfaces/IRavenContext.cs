@@ -2,7 +2,7 @@
 
 namespace FhirArtifactAnalyzer.Infrastructure.Interfaces
 {
-    public interface IRavenDBContext
+    public interface IRavenContext
     {
         IDocumentStore DocumentStore { get; }
     }

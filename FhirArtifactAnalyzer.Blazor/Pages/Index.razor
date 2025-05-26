@@ -1,0 +1,87 @@
+@page "/"
+@inject FhirApiService FhirApiService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>FHIR Artifact Analyzer</PageTitle>
+
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">FHIR Artifact Analyzer</h2>
+    
+    <div class="row">
+        <div class="col-12">
+            <FileUpload OnUploadCompleted="LoadResources" />
+        </div>
+        
+        <div class="col-12 col-md-4">
+            <SearchFilters Filter="@_filter" OnFiltersApplied="ApplyFilters" />
+            <ResourceList Resources="@_resources" OnResourceSelected="SelectResource" />
+            <StatisticsPanel Resources="@_resources" />
+        </div>
+        
+        <div class="col-12 col-md-8">
+            <GraphVisualization Resources="@_resources" Filter="@_filter" OnNodeSelected="SelectNodeById" />
+            <ValidationDisplay Resource="@_selectedResource" OnValidationCompleted="ResourceValidated" />
+            <ExportPanel Resources="@_resources" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<FhirResource> _resources = new List<FhirResource>();
+    private FhirResource _selectedResource;
+    private ArtifactFilter _filter = new ArtifactFilter();
+    private List<FhirResource> _filteredResources = new List<FhirResource>();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadResources();
+    }
+    
+    private async Task LoadResources()
+    {
+        try
+        {
+            _resources = await FhirApiService.GetResourcesAsync();
+            ApplyFilters(_filter);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading resources: {ex.Message}");
+        }
+    }
+    
+    private void SelectResource(FhirResource resource)
+    {
+        _selectedResource = resource;
+    }
+    
+    private void SelectNodeById(string nodeId)
+    {
+        var resource = _resources.FirstOrDefault(r => 
+            r.CanonicalUrl == nodeId || r.Id == nodeId);
+            
+        if (resource != null)
+        {
+            _selectedResource = resource;
+        }
+    }
+    
+    private void ResourceValidated(FhirResource resource)
+    {
+        // Update the resource in the resources list
+        int index = _resources.FindIndex(r => r.Id == resource.Id);
+        if (index >= 0)
+        {
+            _resources[index] = resource;
+        }
+        
+        StateHasChanged();
+    }
+    
+    private void ApplyFilters(ArtifactFilter filter)
+    {
+        _filter = filter;
+        _filteredResources = _filter.Apply(_resources);
+        StateHasChanged();
+    }
+}

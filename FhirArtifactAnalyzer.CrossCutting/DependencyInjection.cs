@@ -1,4 +1,5 @@
 ﻿using FhirArtifactAnalyzer.Application.Services;
+using FhirArtifactAnalyzer.Application.Services.Handlers;
 using FhirArtifactAnalyzer.Domain.Abstractions;
 using FhirArtifactAnalyzer.Domain.Settings;
 using FhirArtifactAnalyzer.Domain.Utils;
@@ -13,6 +14,11 @@ namespace FhirArtifactAnalyzer.CrossCutting
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IFhirParserFactory, FhirParserFactory>();
+            services.AddScoped<IArtifactProcessor, ArtifactProcessor>();
+            services.AddScoped<IDirectoryNavigator, DirectoryNavigator>();
+            services.AddScoped<IExtractorService, ExtractorService>();
+            services.AddScoped<IJsonArtifactAnalyzer, JsonArtifactAnalyzer>();
+            services.AddScoped<IInputIdentifier, InputIdentifier>();
 
             return services;
         }

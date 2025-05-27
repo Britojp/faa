@@ -2,12 +2,12 @@
 
 namespace FhirArtifactAnalyzer.Domain.Abstractions
 {
-    public interface IArtifactAnalyzer
+    public interface IJsonArtifactAnalyzer
     {
         /// <summary>
         /// Lê o arquivo fornecido e retorna uma série de informações sobre o arquivo,
         /// contendo o tipo de recurso FHIR relevante, se houver.
         /// </summary>
-        FhirArtifactInfo Analyze(FhirArtifactInfo artifact);
+        Task<FhirArtifactInfo> AnalyzeAsync(string path, InputSource source);
     }
 }

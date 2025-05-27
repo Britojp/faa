@@ -4,11 +4,11 @@ using FhirArtifactAnalyzer.Domain.Constants;
 namespace FhirArtifactAnalyzer.Application.Services
 {
     /// <summary>
-    /// Responsável pela navegação em diretórios, fazendo varreduras para a busca de arquivos relevantes.
+    /// Responsável pela navegação em diretórios, fazendo varreduras para a busca de arquivos.
     /// </summary>
     public class DirectoryNavigator : IDirectoryNavigator
     {
-        public IEnumerable<string> GetJsonFiles(string root, int maxDepth = 5, int maxFiles = 1000)
+        public IEnumerable<string> GetFiles(string root, int maxDepth = 5, int maxFiles = 1000)
         {
             var collected = new List<string>();
             TraverseDirectory(root, 0, maxDepth, maxFiles, collected);
@@ -39,8 +39,7 @@ namespace FhirArtifactAnalyzer.Application.Services
                 if (ShouldIgnoreFile(file))
                     continue;
 
-                if (IsJsonFile(file))
-                    collected.Add(file);
+                collected.Add(file);
             }
 
             var subdirectories = Directory.GetDirectories(targetDirectory);
@@ -55,11 +54,6 @@ namespace FhirArtifactAnalyzer.Application.Services
 
                 TraverseDirectory(subdirectory, currentDepth + 1, maxDepth, maxFiles, collected);
             }
-        }
-
-        private static bool IsJsonFile(string filePath)
-        {
-            return Path.GetExtension(filePath).Equals(FileExtensions.Json, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool ShouldIgnoreDirectory(string directoryPath)

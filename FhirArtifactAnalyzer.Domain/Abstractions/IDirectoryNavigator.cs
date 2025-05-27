@@ -15,6 +15,6 @@ namespace FhirArtifactAnalyzer.Domain.Abstractions
     /// <returns>Enumerable de caminhos de arquivos JSON válidos.</returns>
     public interface IDirectoryNavigator
     {
-        IEnumerable<string> GetJsonFiles(string root, int maxDepth = 5, int maxFiles = 1000);
+        IEnumerable<string> GetFiles(string root, int maxDepth = 5, int maxFiles = 1000);
     }
 }

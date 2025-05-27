@@ -7,9 +7,9 @@ namespace FhirArtifactAnalyzer.Application.Services
     /// Servico responsavel por orquestrar a extracao de diferentes tipos de entradas,
     /// como arquivos .tgz, .zip, utilizando os manipuladores apropriados.
     /// </summary>
-    public class ExtractorService
+    public class ExtractorService : IExtractorService
     {
-        private readonly List<IInputHandler> _handlers;
+        private readonly IEnumerable<IInputHandler> _handlers;
 
         /// <summary>
         /// Inicializa o servi�o com a lista de manipuladores de entrada disponiveis.

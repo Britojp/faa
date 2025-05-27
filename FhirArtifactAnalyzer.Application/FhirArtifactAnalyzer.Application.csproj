@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="NEST" Version="7.17.5" />
     <PackageReference Include="SharpCompress" Version="0.39.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
   </ItemGroup>
 
   <ItemGroup>

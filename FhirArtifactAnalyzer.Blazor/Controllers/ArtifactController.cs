@@ -12,12 +12,10 @@ namespace FhirArtifactAnalyzer.Blazor.Controllers
     public class ArtifactController : ControllerBase
     {
         private readonly IArtifactProcessor _processor;
-        private readonly IInputIdentifier _identifier;
 
         public ArtifactController(IArtifactProcessor processor, IInputIdentifier identifier)
         {
             _processor = processor;
-            _identifier = identifier;
         }
 
         [HttpPost("analyze")]

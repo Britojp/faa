@@ -8,35 +8,31 @@ namespace FhirArtifactAnalyzer.Application.Services
     /// </summary>
     public class InputIdentifier : IInputIdentifier
     {
-        public IEnumerable<InputType> GetInputType(string pathOrUrl)
+        public InputType? GetInputType(string pathOrUrl)
         {
             if (string.IsNullOrWhiteSpace(pathOrUrl))
-                yield break;
+                return null;
 
             if (Uri.IsWellFormedUriString(pathOrUrl, UriKind.Absolute))
-            {
-                yield return InputType.Url;
-                yield break;
-            }
+                return InputType.Url;
 
             if (File.Exists(pathOrUrl))
             {
                 var extension = Path.GetExtension(pathOrUrl).ToLowerInvariant();
 
-                if (extension == ".json")
-                    yield return InputType.SingleFile;
-
-                if (extension == ".tgz")
-                    yield return InputType.Tgz;
-
-                if (extension == ".zip")
-                    yield return InputType.Zip;
+                return extension switch
+                {
+                    ".json" => InputType.SingleFile,
+                    ".tgz" => InputType.Tgz,
+                    ".zip" => InputType.Zip,
+                    _ => null
+                };
             }
 
             if (Directory.Exists(pathOrUrl))
-            {
-                yield return InputType.Directory;
-            }
+                return InputType.Directory;
+
+            return null;
         }
     }
 }

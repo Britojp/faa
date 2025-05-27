@@ -9,6 +9,6 @@ namespace FhirArtifactAnalyzer.Domain.Abstractions
 {
     public interface IArtifactProcessor
     {
-        Task<IList<FhirArtifactInfo>> ProcessInputAsync(InputSource source);
+        Task<IEnumerable<FhirArtifactInfo>> ProcessInputAsync(InputSource source);
     }
 }

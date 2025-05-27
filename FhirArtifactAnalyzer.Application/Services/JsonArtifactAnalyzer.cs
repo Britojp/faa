@@ -9,54 +9,65 @@ namespace FhirArtifactAnalyzer.Application.Services
     /// <summary>
     /// Responsável por analisar arquivos JSON e verificar se contêm recursos FHIR relevantes.
     /// </summary>
-    public class JsonArtifactAnalyzer : IArtifactAnalyzer
+    public class JsonArtifactAnalyzer : IJsonArtifactAnalyzer
     {
+        private readonly IFhirParserFactory _parserFactory;
         private const long _maxSize = 10 * 1024 * 1024; // 10MB
 
         private static readonly HashSet<string> RelevantResourceTypes = new(StringComparer.OrdinalIgnoreCase)
-    {
-        nameof(StructureDefinition),
-        nameof(CodeSystem),
-        nameof(ValueSet),
-        nameof(CapabilityStatement),
-        nameof(ImplementationGuide),
-        nameof(OperationDefinition),
-        nameof(SearchParameter)
-    };
+        {
+            nameof(StructureDefinition),
+            nameof(CodeSystem),
+            nameof(ValueSet),
+            nameof(CapabilityStatement),
+            nameof(ImplementationGuide),
+            nameof(OperationDefinition),
+            nameof(SearchParameter)
+        };
+        public JsonArtifactAnalyzer(IFhirParserFactory parserFactory)
+        {
+            _parserFactory = parserFactory;
+        }
 
         /// <summary>
         /// Inicializa o servi�o com a lista de manipuladores de entrada disponiveis.
         /// </summary>
-        public async Task<FhirArtifactInfo> AnalyzeAsync(FhirArtifactInfo artifact)
+        public async Task<FhirArtifactInfo> AnalyzeAsync(string filePath, InputSource source)
         {
-            if (!File.Exists(artifact.FilePath))
+            var artifact = new FhirArtifactInfo
+            {
+                FilePath = filePath,
+                Source = source
+            };
+
+            if (!File.Exists(filePath))
                 return Ignore(artifact, "Arquivo não encontrado.");
 
-            if (!IsJsonFile(artifact.FilePath))
+            if (!IsJsonFile(filePath))
             {
                 artifact.IsJson = false;
                 return Ignore(artifact, "Extensão não é .json.");
             }
 
-            var fileInfo = new FileInfo(artifact.FilePath);
+            var fileInfo = new FileInfo(filePath);
             if (fileInfo.Length > _maxSize)
                 return Ignore(artifact, "Arquivo excede o tamanho máximo permitido.");
 
             try
             {
-                var content = await File.ReadAllTextAsync(artifact.FilePath);
-
-                using var doc = JsonDocument.Parse(content);
+                var content = await File.ReadAllTextAsync(filePath);
                 artifact.IsWellFormedJson = true;
 
-                if (!doc.RootElement.TryGetProperty("resourceType", out var resourceTypeElement))
-                    return Ignore(artifact, "Campo 'resourceType' não encontrado.");
+                var parser = _parserFactory.GetParserForFile(filePath);
+                var resource = parser.Parse<Resource>(content); 
 
-                var resourceType = resourceTypeElement.GetString();
-                artifact.ResourceType = resourceType;
+                artifact.ResourceType = resource?.TypeName;
 
-                if (!RelevantResourceTypes.Contains(resourceType))
-                    return Ignore(artifact, $"resourceType '{resourceType}' não é relevante.");
+                if (resource == null)
+                    return Ignore(artifact, "Não foi possível fazer parse do recurso.");
+
+                if (!RelevantResourceTypes.Contains(resource.TypeName))
+                    return Ignore(artifact, $"resourceType '{resource.TypeName}' não é relevante.");
 
                 artifact.IsRelevantFhirResource = true;
             }
@@ -68,14 +79,15 @@ namespace FhirArtifactAnalyzer.Application.Services
             {
                 return Ignore(artifact, $"Erro ao ler o arquivo: {ex.Message}");
             }
-            catch (JsonException)
+            catch (Exception ex)
             {
                 artifact.IsWellFormedJson = false;
-                return Ignore(artifact, "JSON malformado.");
+                return Ignore(artifact, $"Erro ao analisar JSON: {ex.Message}");
             }
 
             return artifact;
         }
+
 
         private static bool IsJsonFile(string filePath) =>
             Path.GetExtension(filePath).Equals(FileExtensions.Json, StringComparison.OrdinalIgnoreCase);

@@ -9,36 +9,49 @@ namespace FhirArtifactAnalyzer.Application.Services
 {
     public class ArtifactProcessor : IArtifactProcessor
     {
-        private readonly DirectoryNavigator _navigator = new();
-        private readonly ExtractorService _extractor = new();
-        private readonly JsonArtifactAnalyzer _analyzer = new();
+        private readonly IDirectoryNavigator _navigator;
+        private readonly IExtractorService _extractor;
+        private readonly IJsonArtifactAnalyzer _analyzer;
+
+        public ArtifactProcessor(
+            IDirectoryNavigator navigator,
+            IExtractorService extractor,
+            IJsonArtifactAnalyzer analyzer)
+        {
+            _navigator = navigator;
+            _extractor = extractor;
+            _analyzer = analyzer;
+        }
 
         /// <summary>
         /// Processa a entrada fornecida e retorna os artefatos FHIR validos.
         /// </summary>
         /// <param name="source">Fonte da entrada contendo caminho, tipo e filtro.</param>
         /// <returns>Lista de artefatos FHIR analisados.</returns>
-        public async Task<IList<FhirArtifactInfo>> ProcessInputAsync(InputSource source)
+        public async Task<IEnumerable<FhirArtifactInfo>> ProcessInputAsync(InputSource source)
         {
             var paths = GetPathsFromSource(source);
 
             if (!string.IsNullOrWhiteSpace(source.RegexFilter))
             {
                 var regex = new Regex(source.RegexFilter);
-                paths = paths.Where(p => regex.IsMatch(Path.GetFileName(p))).ToList();
+
+                bool MatchesRegex(string path) => regex.IsMatch(Path.GetFileName(path));
+
+                paths = paths.Where(MatchesRegex).ToList();
             }
 
-            var results = await Task.WhenAll(paths.Select(p =>
+            var infos = paths.Select(p => new FhirArtifactInfo
             {
-                var info = new FhirArtifactInfo
-                {
-                    FilePath = p,
-                    Source = source
-                };
-                return _analyzer.AnalyzeAsync(info);
-            }));
+                FilePath = p,
+                Source = source
+            });
 
-            return results.ToList();
+            var analysisTasks = paths.Select(p => _analyzer.AnalyzeAsync(p, source));
+
+            var results = await Task.WhenAll(analysisTasks);
+
+            return results;
         }
 
         /// <summary>
@@ -62,10 +75,16 @@ namespace FhirArtifactAnalyzer.Application.Services
 
                 case InputType.Tgz:
                 case InputType.Zip:
-                    var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-                    var extractedDir = _extractor.Extract(source.PathOrUrl, tempDir);
-                    paths.AddRange(Directory.GetFiles(extractedDir, "*.*", SearchOption.AllDirectories));
-                    break;
+                    {
+                        var tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+                        var extractedDir = _extractor.Extract(source.PathOrUrl, tempDir);
+
+                        var extractedFiles = Directory.GetFiles(extractedDir, "*.*", SearchOption.AllDirectories);
+
+                        paths.AddRange(extractedFiles);
+                        break;
+                    }
 
                 case InputType.Url:
                     throw new NotImplementedException("Entrada via URL ainda não foi implementada.");

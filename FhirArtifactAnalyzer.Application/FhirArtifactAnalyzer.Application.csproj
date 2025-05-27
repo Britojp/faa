@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SharpCompress" Version="0.39.0" />
+    <PackageReference Include="Spectre.Console.Cli" Version="0.50.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FhirArtifactAnalyzer.Domain\FhirArtifactAnalyzer.Domain.csproj" />
   </ItemGroup>
 

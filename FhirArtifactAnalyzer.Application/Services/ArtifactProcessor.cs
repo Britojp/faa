@@ -41,12 +41,6 @@ namespace FhirArtifactAnalyzer.Application.Services
                 paths = paths.Where(MatchesRegex).ToList();
             }
 
-            var infos = paths.Select(p => new FhirArtifactInfo
-            {
-                FilePath = p,
-                Source = source
-            });
-
             var analysisTasks = paths.Select(p => _analyzer.AnalyzeAsync(p, source));
 
             var results = await Task.WhenAll(analysisTasks);

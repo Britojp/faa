@@ -20,9 +20,6 @@ namespace FhirArtifactAnalyzer.CrossCutting
             services.AddScoped<IJsonArtifactAnalyzer, JsonArtifactAnalyzer>();
             services.AddScoped<IInputIdentifier, InputIdentifier>();
 
-            services.AddScoped<IInputHandler, TgzHandler>();
-            services.AddScoped<IInputHandler, ZipHandler>();
-
             return services;
         }
 

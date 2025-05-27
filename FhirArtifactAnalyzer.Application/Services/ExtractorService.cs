@@ -16,7 +16,11 @@ namespace FhirArtifactAnalyzer.Application.Services
         /// </summary>
         public ExtractorService(IEnumerable<IInputHandler> handlers)
         {
-            _handlers = handlers;
+            _handlers =
+            [
+                new TgzHandler(),
+                new ZipHandler(),
+            ];
         }
 
         /// <summary>

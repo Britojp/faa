@@ -21,21 +21,19 @@ namespace FhirArtifactAnalyzer.Cli
 
         public override async Task<int> ExecuteAsync(CommandContext context, AnalyzeSettings settings)
         {
-            var possibleTypes = _identifier.GetInputType(settings.Path).ToList();
+            var inputType = _identifier.GetInputType(settings.Path);
 
-            if (!possibleTypes.Any())
+            if (inputType is null)
             {
                 AnsiConsole.MarkupLine("[red]Não foi possível determinar o tipo da entrada.[/]");
                 return -1;
             }
 
-            var selectedType = possibleTypes.First();
-
             var input = new InputSource
             {
                 PathOrUrl = settings.Path,
                 RegexFilter = settings.Regex,
-                Type = selectedType
+                Type = inputType.Value
             };
 
             var result = await _processor.ProcessInputAsync(input);

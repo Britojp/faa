@@ -1,69 +1,88 @@
 ﻿using FhirArtifactAnalyzer.Domain.Abstractions;
 using FhirArtifactAnalyzer.Domain.Models;
+using FhirArtifactAnalyzer.Infrastructure.Interfaces;
+using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
 using Raven.Client.Documents.Session;
 using System.Linq.Expressions;
 
 namespace FhirArtifactAnalyzer.Infrastructure.Repositories
 {
-    public class Repository<TEntity>(IDocumentSession session) : IDisposable, IRepository<TEntity> where TEntity : class
+    public sealed class Repository<TEntity>(IRavenContext context) : IDisposable, IRepository<TEntity> where TEntity : class, IEntity
     {
+        private readonly Lazy<IDocumentSession> _lazySession = new(context.DocumentStore.OpenSession);
+
+        private IDocumentSession Session => _lazySession.Value;
+
         public IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>>? predicate = null)
         {
-            var query = predicate != null
-                ? session.Query<TEntity>().Where(predicate)
-                : session.Query<TEntity>();
+            var query = Session.Query<TEntity>().Customize(c => c.NoTracking());
 
-            return query.Customize(x => x.NoTracking()).ToList();
+            if (predicate is not null)
+                query = query.Where(predicate);
+
+            return [.. query];
         }
 
-        public TEntity? Get(string? id)
+        public TEntity? Get(string id)
         {
-            return session.Load<TEntity>(id);
+            var entity = Session.Load<TEntity>(id);
+            Session.Advanced.Evict(entity);
+            return entity;
         }
 
         public TEntity? Get(Expression<Func<TEntity, bool>> predicate)
         {
-            return session.Query<TEntity>().Where(predicate).FirstOrDefault();
+            var query = Session.Query<TEntity>().Customize(opt => opt.NoTracking());
+
+            return query.Where(predicate).FirstOrDefault();
         }
 
         public void Add(TEntity entity)
         {
-            session.Store(entity);
+            Session.Store(entity);
+        }
+
+        public void Update(string id, TEntity entity)
+        {
+            Session.Store(entity, id);
         }
 
         public void Delete(TEntity entity)
         {
-            session.Delete(entity);
+            Session.Delete(entity);
         }
 
-        public void Attach(TEntity entity, AttachmentFile file)
+        public AttachmentFile? GetAttachment(string documentId, string attachmentName)
         {
-            session.Advanced.Attachments.Store(entity, file.Name, file.Stream, file.ContentType);
-        }
+            var document = Session.Load<TEntity>(documentId);
+            var attachment = Session.Advanced.Attachments.Get(document, attachmentName);
 
-        public AttachmentFile? GetAttachmentFor(TEntity document)
-        {
-            var attachmentName = session.Advanced.Attachments.GetNames(document).FirstOrDefault();
-
-            if (attachmentName == null)
+            if (attachment is null)
             {
                 return null;
             }
 
-            var attachment = session.Advanced.Attachments.Get(document, attachmentName.Name);
-
             return new(attachment.Details.Name, attachment.Stream, attachment.Details.ContentType);
+        }
+
+        public void Attach(TEntity entity, AttachmentFile file)
+        {
+            Session.Advanced.Attachments.Store(entity, file.Name, file.Stream, file.ContentType);
         }
 
         public void Commit()
         {
-            session.SaveChanges();
+            Session.SaveChanges();
         }
 
         public void Dispose()
         {
-            session.Dispose();
+            if (_lazySession.IsValueCreated)
+            {
+                Session.Dispose();
+            }
+
             GC.SuppressFinalize(this);
         }
     }

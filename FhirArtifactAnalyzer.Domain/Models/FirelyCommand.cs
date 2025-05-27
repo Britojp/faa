@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using FhirArtifactAnalyzer.Domain.Extensions;
+using System.Diagnostics;
 
 namespace FhirArtifactAnalyzer.Domain.Models
 {
@@ -50,7 +51,7 @@ namespace FhirArtifactAnalyzer.Domain.Models
 
             process.WaitForExit();
 
-            if (!string.IsNullOrEmpty(stderr))
+            if (stderr.HasValue())
             {
                 throw new Exception($"Firely CLI error: {stderr}");
             }

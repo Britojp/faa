@@ -1,4 +1,5 @@
 ﻿using FhirArtifactAnalyzer.Domain.Abstractions;
+using FhirArtifactAnalyzer.Domain.Constants;
 using FhirArtifactAnalyzer.Domain.Models;
 
 namespace FhirArtifactAnalyzer.Application.Services
@@ -22,15 +23,14 @@ namespace FhirArtifactAnalyzer.Application.Services
 
                 return extension switch
                 {
-                    ".json" => InputType.SingleFile,
-                    ".tgz" => InputType.Tgz,
-                    ".zip" => InputType.Zip,
+                    FileExtensions.Json => InputType.SingleFile,
+                    FileExtensions.Tgz => InputType.Tgz,
+                    FileExtensions.Zip => InputType.Zip,
                     _ => null
                 };
             }
 
-            if (Directory.Exists(pathOrUrl))
-                return InputType.Directory;
+            if (Directory.Exists(pathOrUrl)) return InputType.Directory;
 
             return null;
         }

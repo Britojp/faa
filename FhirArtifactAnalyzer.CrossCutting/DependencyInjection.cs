@@ -1,11 +1,18 @@
 ﻿using FhirArtifactAnalyzer.Application.Services;
 using FhirArtifactAnalyzer.Application.Services.Handlers;
 using FhirArtifactAnalyzer.Domain.Abstractions;
+using FhirArtifactAnalyzer.Domain.Models;
 using FhirArtifactAnalyzer.Domain.Settings;
 using FhirArtifactAnalyzer.Domain.Utils;
 using FhirArtifactAnalyzer.Domain.Validation;
 using FhirArtifactAnalyzer.Infrastructure;
+using FhirArtifactAnalyzer.Infrastructure.Configuration;
+using FhirArtifactAnalyzer.Infrastructure.Interfaces;
+using FhirArtifactAnalyzer.Infrastructure.Proxies;
+using FhirArtifactAnalyzer.Infrastructure.Searchers;
+using FhirArtifactAnalyzer.Infrastructure.Utils;
 using Microsoft.Extensions.DependencyInjection;
+using Nest;
 
 namespace FhirArtifactAnalyzer.CrossCutting
 {
@@ -25,7 +32,21 @@ namespace FhirArtifactAnalyzer.CrossCutting
 
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
-            services.AddScoped(_ => DocumentStoreHolder.Store.OpenSession());
+            services.AddScoped<IElasticClient>(_ =>
+            {
+                var uri = new Uri(ElasticSearchConfiguration.Uri);
+                var settings = new ConnectionSettings(uri)
+                    .DefaultIndex(ElasticSearchConfiguration.DefaultIndexName);
+
+                var client = new ElasticClient(settings);
+                ElasticSearchIndexInitializer.EnsureIndexExists(client, ElasticSearchConfiguration.DefaultIndexName);
+
+                return client;
+            });
+
+            services.AddScoped<IRavenContext, RavenContext>();
+            services.AddScoped<Domain.Abstractions.IRepository<FhirResource>, ElasticSyncRepository<FhirResource>>();
+            services.AddScoped<IFhirResourceSearcher, FhirResourceElasticSearcher>();
 
             return services;
         }

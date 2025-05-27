@@ -8,8 +8,6 @@ class Program
     {
         using var host = CreateHost(args);
         using var scope = CreateScope(host);
-        
-        Console.WriteLine("Hello Fhir!");
     }
 
     private static IHost CreateHost(string[] args)

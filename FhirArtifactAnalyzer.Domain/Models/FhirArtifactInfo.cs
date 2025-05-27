@@ -1,7 +1,4 @@
-﻿using FhirArtifactAnalyzer.Domain.Constants;
-using System.Text.RegularExpressions;
-
-namespace FhirArtifactAnalyzer.Domain.Models
+﻿namespace FhirArtifactAnalyzer.Domain.Models
 {
     public class FhirArtifactInfo
     {

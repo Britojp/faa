@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.Tests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.Cli", "FhirArtifactAnalyzer.Cli\FhirArtifactAnalyzer.Cli.csproj", "{E53D0887-5FBA-4133-BF1B-FE913CA7E557}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FhirArtifactAnalyzer.Worker", "FhirArtifactAnalyzer.Worker\FhirArtifactAnalyzer.Worker.csproj", "{D7FB5EFC-9FE6-4199-8E98-5C9CE547A1C6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{E53D0887-5FBA-4133-BF1B-FE913CA7E557}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E53D0887-5FBA-4133-BF1B-FE913CA7E557}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E53D0887-5FBA-4133-BF1B-FE913CA7E557}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7FB5EFC-9FE6-4199-8E98-5C9CE547A1C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7FB5EFC-9FE6-4199-8E98-5C9CE547A1C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7FB5EFC-9FE6-4199-8E98-5C9CE547A1C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7FB5EFC-9FE6-4199-8E98-5C9CE547A1C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

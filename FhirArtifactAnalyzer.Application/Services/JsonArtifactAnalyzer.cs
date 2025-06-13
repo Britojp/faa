@@ -41,17 +41,17 @@ namespace FhirArtifactAnalyzer.Application.Services
             };
 
             if (!File.Exists(filePath))
-                return Ignore(artifact, "Arquivo não encontrado.");
+                return Ignore(artifact, "Arquivo nao encontrado.");
 
             if (!IsJsonFile(filePath))
             {
                 artifact.IsJson = false;
-                return Ignore(artifact, "Extensão não é .json.");
+                return Ignore(artifact, "Extensao nao e .json.");
             }
 
             var fileInfo = new FileInfo(filePath);
             if (fileInfo.Length > _maxSize)
-                return Ignore(artifact, "Arquivo excede o tamanho máximo permitido.");
+                return Ignore(artifact, "Arquivo excede o tamanho maximo permitido.");
 
             try
             {
@@ -64,16 +64,16 @@ namespace FhirArtifactAnalyzer.Application.Services
                 artifact.ResourceType = resource?.TypeName;
 
                 if (resource == null)
-                    return Ignore(artifact, "Não foi possível fazer parse do recurso.");
+                    return Ignore(artifact, "Nao foi possivel fazer parse do recurso.");
 
                 if (!RelevantResourceTypes.Contains(resource.TypeName))
-                    return Ignore(artifact, $"resourceType '{resource.TypeName}' não é relevante.");
+                    return Ignore(artifact, $"resourceType '{resource.TypeName}' nao e relevante.");
 
                 artifact.IsRelevantFhirResource = true;
             }
             catch (UnauthorizedAccessException)
             {
-                return Ignore(artifact, "Permissão negada ao acessar o arquivo.");
+                return Ignore(artifact, "Permissao negada ao acessar o arquivo.");
             }
             catch (IOException ex)
             {

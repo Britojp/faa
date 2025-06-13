@@ -1,56 +1,638 @@
 @using Microsoft.AspNetCore.Components.Forms
+@using System.IO.Compression
+@using SharpCompress.Readers
+@using SharpCompress.Common
 @inject IJSRuntime JS
 
-<div class="card shadow-sm p-4 mb-4">
-    <h5 class="card-title mb-3 text-primary">Upload de Arquivos</h5>
-
-    <p class="mb-3">
-        Clique abaixo para selecionar um arquivo. Os arquivos aceitos são:
-    </p>
-    <ul>
-        <li><strong>Pacotes NPM (.tgz):</strong> Tamanho máximo de 100MB</li>
-        <li><strong>Arquivos ZIP:</strong> Tamanho máximo de 100MB</li>
-        <li><strong>Diretórios:</strong> Limite de 1.000 arquivos por diretório.</li>
-        <li><strong>Arquivos Individuais:</strong> Apenas JSON. Tamanho máximo de 10MB. Encoding: UTF-8.</li>
-    </ul>
-    <p><strong>Timeout para download:</strong> 30 segundos.</p>
-
-    <div class="dropzone" @onclick="TriggerFileInput">
-        <InputFile @ref="inputFileRef" OnChange="HandleFileSelected" class="d-none" id="inputFile" />
-        <p class="dropzone-text text-center">Clique aqui para selecionar um arquivo</p>
-    </div>
-
-    @if (selectedFileName != null)
-    {
-        <div class="alert alert-info mt-3" role="alert">
-            <strong>Arquivo selecionado:</strong> @selectedFileName<br />
-            <strong>Tamanho:</strong> @selectedFileSize KB
+<div class="file-upload-container">
+    <div class="upload-card">
+        <div class="card-header">
+            <h5 class="card-title">
+                <i class="bi bi-cloud-upload me-2"></i>
+                Upload de Arquivos
+            </h5>
         </div>
-    }
 
-    <button class="btn btn-primary mt-3" @onclick="HandleUpload" disabled="@(!IsFileSelected)">Enviar</button>
+        <div class="card-body">
+            <div class="formats-info mb-4">
+                <p class="info-text mb-3">
+                    Clique abaixo para selecionar um arquivo. Os arquivos aceitos são:
+                </p>
+
+                <div class="formats-grid">
+                    <div class="format-item">
+                        <div class="format-icon">
+                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                        </div>
+                        <div class="format-details">
+                            <strong>Pacotes NPM (.tgz)</strong>
+                            <small>Tamanho máximo de 100MB</small>
+                        </div>
+                    </div>
+
+                    <div class="format-item">
+                        <div class="format-icon">
+                            <i class="bi bi-archive-fill"></i>
+                        </div>
+                        <div class="format-details">
+                            <strong>Arquivos ZIP</strong>
+                            <small>Tamanho máximo de 100MB</small>
+                        </div>
+                    </div>
+
+                    <div class="format-item">
+                        <div class="format-icon">
+                            <i class="bi bi-folder-fill"></i>
+                        </div>
+                        <div class="format-details">
+                            <strong>Diretórios</strong>
+                            <small>Limite de 1.000 arquivos por diretório</small>
+                        </div>
+                    </div>
+
+                    <div class="format-item">
+                        <div class="format-icon">
+                            <i class="bi bi-filetype-json"></i>
+                        </div>
+                        <div class="format-details">
+                            <strong>Arquivos JSON</strong>
+                            <small>Tamanho máximo de 10MB. Encoding: UTF-8</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeout-info">
+                    <i class="bi bi-clock me-1"></i>
+                    <small>Timeout para download: 30 segundos</small>
+                </div>
+            </div>
+
+            <div id="dropzoneArea"
+                 class="dropzone @(isDragOver ? "drag-over" : "")"
+                 @onclick="TriggerFileInput"
+                 @ondragenter="HandleDragEnter"
+                 @ondragleave="HandleDragLeave"
+                 role="button"
+                 tabindex="0"
+                 aria-label="Selecionar arquivo">
+
+
+                <InputFile @ref="inputFileRef" OnChange="HandleFileSelected" id="inputFile" />
+
+                <div class="dropzone-content">
+                    <div class="dropzone-icon">
+                        <i class="bi bi-cloud-upload-fill"></i>
+                    </div>
+                    <div class="dropzone-text">
+                        <span class="primary-text">Clique aqui para selecionar um arquivo</span>
+                        <span class="secondary-text">ou arraste e solte arquivos aqui</span>
+                    </div>
+                </div>
+            </div>
+
+            @if (selectedFileName != null)
+            {
+                <div class="file-info-card">
+                    <div class="file-info-header">
+                        <div class="file-icon">
+                            <i class="@GetFileIcon(selectedFileName)"></i>
+                        </div>
+                        <div class="file-details">
+                            <div class="file-name">@selectedFileName</div>
+                            <div class="file-size">@FormatFileSize(selectedFileSize)</div>
+                        </div>
+                        <button class="btn-remove" @onclick="RemoveFile" title="Remover arquivo">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    @if (isProcessing)
+                    {
+                        <div class="processing-indicator">
+                            <div class="spinner"></div>
+                            <span>Processando arquivo...</span>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(fileContentText))
+                    {
+                        <div class="file-preview">
+                            <div class="preview-header">
+                                <strong>Conteúdo do arquivo (JSON):</strong>
+                                <button class="btn-copy" @onclick="CopyToClipboard" title="Copiar conteúdo">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <pre class="json-content">@fileContentText</pre>
+                        </div>
+                    }
+                    else if (archiveFileList != null && archiveFileList.Any())
+                    {
+                        <div class="archive-contents">
+                            <div class="archive-header">
+                                <strong>Arquivos contidos (@archiveFileList.Count arquivo@(archiveFileList.Count > 1 ? "s" : "")):</strong>
+                                <button class="btn-expand" @onclick="ToggleArchiveExpanded">
+                                    <i class="bi bi-@(isArchiveExpanded ? "chevron-up" : "chevron-down")"></i>
+                                </button>
+                            </div>
+                            <div class="archive-list @(isArchiveExpanded ? "expanded" : "")">
+                                @foreach (var file in archiveFileList.Take(isArchiveExpanded ? archiveFileList.Count : 5))
+                                {
+                                    <div class="archive-file-item">
+                                        <i class="bi bi-file-earmark me-2"></i>
+                                        <span>@file</span>
+                                    </div>
+                                }
+                                @if (!isArchiveExpanded && archiveFileList.Count > 5)
+                                {
+                                    <div class="archive-file-item more-files">
+                                        <i class="bi bi-three-dots me-2"></i>
+                                        <span>e mais @(archiveFileList.Count - 5) arquivo@(archiveFileList.Count - 5 > 1 ? "s" : "")</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <button class="btn-upload @(selectedFile == null ? "disabled" : "")"
+                    disabled="@(selectedFile == null || isProcessing)"
+                    @onclick="HandleUpload">
+                @if (isProcessing)
+                {
+                    <div class="btn-spinner"></div>
+                    <span>Processando...</span>
+                }
+                else
+                {
+                    <i class="bi bi-upload me-2"></i>
+                    <span>Enviar Arquivo</span>
+                }
+            </button>
+        </div>
+    </div>
 </div>
 
-@if (showModal)
+@if (showModal) 
 {
-    <div class="modal fade show d-block" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
+    <div class="modal-overlay" @onclick="CloseModal">
+        <div class="modal-dialog" @onclick:stopPropagation="true">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Resultado do Upload</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Close"></button>
+                    <h5 class="modal-title">
+                        <i class="bi bi-@(uploadSuccess ? "check-circle-fill text-success" : "exclamation-triangle-fill text-warning") me-2"></i>
+                        Resultado do Upload
+                    </h5>
+                    <button class="btn-close" @onclick="CloseModal" aria-label="Fechar">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p>@uploadMessage</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Fechar</button>
+                    <button class="btn-secondary" @onclick="CloseModal">Fechar</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal-backdrop fade show"></div>
 }
+
+<style>
+    .file-upload-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .upload-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-bottom: none;
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .formats-info {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .info-text {
+        color: #64748b;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .formats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .format-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .format-icon {
+        color: #667eea;
+        font-size: 1.5rem;
+        margin-top: 0.25rem;
+    }
+
+    .format-details strong {
+        display: block;
+        color: #1e293b;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .format-details small {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+
+    .timeout-info {
+        color: #64748b;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 0.5rem;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .dropzone {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #fafbfc;
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+        .dropzone:hover,
+        .dropzone:focus {
+            border-color: #667eea;
+            background: #f1f5f9;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .dropzone.drag-over {
+            border-color: #667eea;
+            background: #eef2ff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+    .dropzone-content {
+        pointer-events: none;
+    }
+
+    .dropzone-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .dropzone-text .primary-text {
+        display: block;
+        color: #1e293b;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .dropzone-text .secondary-text {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    #inputFile {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .file-info-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .file-info-header {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .file-icon {
+        font-size: 2rem;
+        color: #667eea;
+        margin-right: 1rem;
+    }
+
+    .file-details {
+        flex: 1;
+    }
+
+    .file-name {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .file-size {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .btn-remove {
+        background: none;
+        border: none;
+        color: #64748b;
+        padding: 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .btn-remove:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+    .processing-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        gap: 1rem;
+        color: #667eea;
+    }
+
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e5e7eb;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .file-preview {
+        padding: 1rem;
+    }
+
+    .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: #1e293b;
+    }
+
+    .btn-copy {
+        background: none;
+        border: none;
+        color: #64748b;
+        padding: 0.25rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .btn-copy:hover {
+            color: #667eea;
+        }
+
+    .json-content {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        line-height: 1.5;
+    }
+
+    .archive-contents {
+        padding: 1rem;
+    }
+
+    .archive-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: #1e293b;
+    }
+
+    .btn-expand {
+        background: none;
+        border: none;
+        color: #64748b;
+        padding: 0.25rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+
+        .btn-expand:hover {
+            color: #667eea;
+        }
+
+    .archive-list {
+        max-height: 200px;
+        overflow-y: auto;
+        transition: max-height 0.3s ease;
+    }
+
+        .archive-list:not(.expanded) {
+            max-height: 120px;
+        }
+
+    .archive-file-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        color: #64748b;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .archive-file-item:last-child {
+            border-bottom: none;
+        }
+
+        .archive-file-item.more-files {
+            font-style: italic;
+            color: #94a3b8;
+        }
+
+    .btn-upload {
+        width: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+        .btn-upload:hover:not(.disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-upload.disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+    .btn-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-dialog {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        max-width: 500px;
+        width: 90%;
+        max-height: 90vh;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        color: #64748b;
+        padding: 0.5rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .btn-close:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+    .modal-body {
+        padding: 1.5rem;
+        color: #64748b;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        color: #64748b;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+    
+</style>
 
 @code {
     IBrowserFile? selectedFile;
@@ -58,38 +640,77 @@
     long selectedFileSize;
     string? uploadMessage;
     byte[]? fileContent;
+    string? fileContentText;
+    List<string>? archiveFileList;
 
     private InputFile? inputFileRef;
     private bool showModal;
+    private bool uploadSuccess;
+    private bool isProcessing;
+    private bool isDragOver;
+    private bool isArchiveExpanded;
 
-    private bool IsFileSelected => selectedFile != null;
+    private async Task TriggerFileInput()
+    {
+        if (inputFileRef != null)
+        {
+            await JS.InvokeVoidAsync("eval", "document.getElementById('inputFile').click()");
+        }
+    }
 
-    private Task HandleFileSelected(InputFileChangeEventArgs e)
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
         selectedFile = e.File;
         selectedFileName = selectedFile?.Name;
-        selectedFileSize = selectedFile?.Size / 1024 ?? 0;
-        uploadMessage = null; // reseta qualquer mensagem de upload anterior
+        selectedFileSize = selectedFile?.Size ?? 0;
+        uploadMessage = null;
+        fileContentText = null;
+        archiveFileList = null;
+        isArchiveExpanded = false;
 
-        return Task.CompletedTask;
+        await ProcessFile();
     }
 
-    private async Task HandleUpload()
+    private void HandleUpload()
     {
         if (selectedFile == null)
         {
             uploadMessage = "Nenhum arquivo selecionado.";
+            uploadSuccess = false;
             showModal = true;
             return;
         }
 
-        int maxSize = 100 * 1024 * 1024;
+        uploadMessage = $"Arquivo '{selectedFileName}' enviado com sucesso!";
+        uploadSuccess = true;
+        showModal = true;
+    }
+
+
+    private async Task ProcessFile()
+    {
+        if (selectedFile == null) return;
+
+        isProcessing = true;
+        StateHasChanged();
+
+        int maxSize = 100 * 1024 * 1024; // 100 MB padrão
+
+        if (selectedFileName?.EndsWith(".json", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            maxSize = 10 * 1024 * 1024; // 10MB para JSON
+        }
 
         try
         {
+            await Task.Delay(500); // Simula processamento
+
             if (selectedFile.Size > maxSize)
             {
-                uploadMessage = "Arquivo muito grande. Tamanho máximo permitido: 100MB";
+                uploadMessage = selectedFileName?.EndsWith(".json", StringComparison.OrdinalIgnoreCase) == true
+                    ? "Arquivo JSON muito grande. Tamanho máximo permitido: 10MB"
+                    : "Arquivo muito grande. Tamanho máximo permitido: 100MB";
+                uploadSuccess = false;
                 showModal = true;
                 return;
             }
@@ -97,78 +718,157 @@
             using var stream = selectedFile.OpenReadStream(maxSize);
             fileContent = new byte[selectedFile.Size];
             await stream.ReadAsync(fileContent);
-            uploadMessage = $"Arquivo '{selectedFileName}' armazenado com sucesso!";
+
+            fileContentText = null;
+            archiveFileList = null;
+
+            if (selectedFileName?.EndsWith(".json", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                fileContentText = System.Text.Encoding.UTF8.GetString(fileContent);
+                if (fileContentText.Length > 2000)
+                {
+                    fileContentText = fileContentText.Substring(0, 2000) + "\n\n... (conteúdo truncado)";
+                }
+            }
+            else if (selectedFileName?.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                archiveFileList = ListZipContents(fileContent);
+            }
+            else if (selectedFileName?.EndsWith(".tgz", StringComparison.OrdinalIgnoreCase) == true ||
+                     selectedFileName?.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                archiveFileList = ListTgzContents(fileContent);
+            }
         }
         catch (Exception ex)
         {
-            uploadMessage = $"Erro ao enviar arquivo: {ex.Message}";
+            uploadMessage = $"Erro ao processar arquivo: {ex.Message}";
+            uploadSuccess = false;
+            showModal = true;
         }
         finally
         {
-            showModal = true;
+            isProcessing = false;
+            StateHasChanged();
         }
     }
 
-    private async Task TriggerFileInput()
+    private List<string> ListZipContents(byte[] fileBytes)
     {
-        await JS.InvokeVoidAsync("triggerFileInput", "inputFile"); //utiliza o js para abrir o file input
+        var list = new List<string>();
+        try
+        {
+            using var ms = new MemoryStream(fileBytes);
+            using var archive = new ZipArchive(ms, ZipArchiveMode.Read, false);
+
+            foreach (var entry in archive.Entries)
+            {
+                if (!string.IsNullOrEmpty(entry.Name))
+                {
+                    list.Add(entry.FullName);
+                }
+            }
+        }
+        catch
+        {
+            list.Add("Erro ao ler conteúdo do arquivo ZIP");
+        }
+
+        return list.OrderBy(x => x).ToList();
+    }
+
+    private List<string> ListTgzContents(byte[] fileBytes)
+    {
+        var list = new List<string>();
+        try
+        {
+            using var ms = new MemoryStream(fileBytes);
+            using var reader = ReaderFactory.Open(ms);
+
+            while (reader.MoveToNextEntry())
+            {
+                if (!reader.Entry.IsDirectory && !string.IsNullOrEmpty(reader.Entry.Key))
+                {
+                    list.Add(reader.Entry.Key);
+                }
+            }
+        }
+        catch
+        {
+            list.Add("Erro ao ler conteúdo do arquivo TGZ");
+        }
+
+        return list.OrderBy(x => x).ToList();
     }
 
     private void CloseModal()
     {
         showModal = false;
     }
+
+    private void RemoveFile()
+    {
+        selectedFile = null;
+        selectedFileName = null;
+        selectedFileSize = 0;
+        fileContentText = null;
+        archiveFileList = null;
+        uploadMessage = null;
+    }
+
+    private string GetFileIcon(string fileName)
+    {
+        if (fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            return "bi bi-filetype-json";
+        else if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            return "bi bi-file-zip";
+        else if (fileName.EndsWith(".tgz", StringComparison.OrdinalIgnoreCase) ||
+                 fileName.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase))
+            return "bi bi-archive";
+        else
+            return "bi bi-file-earmark";
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024)
+            return $"{bytes} B";
+        else if (bytes < 1024 * 1024)
+            return $"{bytes / 1024:F1} KB";
+        else
+            return $"{bytes / (1024 * 1024):F1} MB";
+    }
+
+    private async Task CopyToClipboard()
+    {
+        if (!string.IsNullOrEmpty(fileContentText))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", fileContentText);
+        }
+    }
+
+    private void ToggleArchiveExpanded()
+    {
+        isArchiveExpanded = !isArchiveExpanded;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("blazorFileDrop.preventDragDefaults", "dropzoneArea");
+        }
+    }
+
+
+    private void HandleDragEnter(DragEventArgs e)
+    {
+        isDragOver = true;
+    }
+
+    private void HandleDragLeave(DragEventArgs e)
+    {
+        isDragOver = false;
+    }
+    }
 }
-
-<style>
-    .dropzone {
-        border: 2px dashed #007bff;
-        border-radius: 8px;
-        padding: 20px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .dropzone:hover {
-        background-color: #f0f8ff;
-    }
-
-    .dropzone-text {
-        font-size: 1.2rem;
-        color: #007bff;
-        margin-top: 10px;
-    }
-
-    .alert {
-        font-size: 1rem;
-    }
-
-    ul {
-        list-style-type: none;
-        padding-left: 0;
-    }
-
-    ul li {
-        margin-bottom: 5px;
-    }
-
-    .modal-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 1040;
-    }
-
-    .modal {
-        z-index: 1050;
-    }
-</style>
-
-<script>
-    window.triggerFileInput = (inputId) => {
-        document.getElementById(inputId).click();
-    };
-</script>

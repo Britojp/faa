@@ -1,114 +1,76 @@
 ﻿@page "/"
 @inherits LayoutComponentBase
+@inject IJSRuntime JS
 
-<div class="container my-5">
-    <h1 class="text-center text-primary mb-4 display-4">Bem-vindo ao FHIR Artifact Analyzer</h1>
+<div class="container py-5">
+    <h1 class="text-center text-primary mb-5 display-4 fw-bold">FHIR Artifact Analyzer</h1>
 
-    <section class="text-center mb-5">
-        <p class="lead">
-            O <strong>FHIR Artifact Analyzer</strong> é uma ferramenta inovadora desenvolvida para identificar, validar
-            e facilitar a consulta a artefatos do padrão <strong>FHIR (versão 4.0.1)</strong>.
-            Com uma interface simples, ela permite explorar artefatos FHIR de maneira intuitiva.
+    <section class="text-center mb-5 px-md-5 mx-md-auto" style="max-width:720px;">
+        <p class="lead text-secondary fs-5">
+            O <strong>FHIR Artifact Analyzer</strong> é uma ferramenta inovadora para identificar, validar e explorar artefatos
+            do padrão <strong>FHIR (versão 4.0.1)</strong>, oferecendo uma experiência interativa e simplificada.
         </p>
     </section>
 
-    <section>
-        <h2 class="text-center text-primary mb-4">Funcionalidades Principais</h2>
+    <section class="mb-5">
+        <h2 class="text-center text-dark mb-4 fw-semibold">Funcionalidades Principais</h2>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             <div class="col">
-                <div class="card shadow-lg border-light rounded-3 hover-shadow">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-check-circle-fill text-success"></i> Identificação e
-                            Validação</h5>
-                        <p class="card-text">Identifique artefatos FHIR e valide sua conformidade com o padrão de forma
-                            automatizada e precisa.</p>
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle-fill text-success fs-2 mb-3"></i>
+                        <h5 class="card-title fw-semibold">Identificação e Validação</h5>
+                        <p class="card-text text-muted fs-6">
+                            Identifique artefatos FHIR e valide sua conformidade com o padrão automaticamente.
+                        </p>
                     </div>
                 </div>
             </div>
+
             <div class="col">
-                <div class="card shadow-lg border-light rounded-3 hover-shadow">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-search text-info"></i> Consulta de Artefatos</h5>
-                        <p class="card-text">Consulte artefatos FHIR localmente ou remotamente, explorando suas
-                            propriedades e relacionamentos.</p>
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body text-center">
+                        <i class="bi bi-search text-info fs-2 mb-3"></i>
+                        <h5 class="card-title fw-semibold">Consulta de Artefatos</h5>
+                        <p class="card-text text-muted fs-6">
+                            Explore artefatos localmente ou remotamente com visualização detalhada.
+                        </p>
                     </div>
                 </div>
             </div>
+
             <div class="col">
-                <div class="card shadow-lg border-light rounded-3 hover-shadow">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-folder-fill text-warning"></i> Suporte a Múltiplos
-                            Formatos</h5>
-                        <p class="card-text">A ferramenta suporta pacotes .tgz, diretórios e arquivos JSON individuais,
-                            garantindo flexibilidade.</p>
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body text-center">
+                        <i class="bi bi-folder-fill text-warning fs-2 mb-3"></i>
+                        <h5 class="card-title fw-semibold">Suporte a Múltiplos Formatos</h5>
+                        <p class="card-text text-muted fs-6">
+                            Trabalhe com pacotes .tgz, diretórios ou arquivos JSON com flexibilidade total.
+                        </p>
                     </div>
                 </div>
             </div>
+
             <div class="col">
-                <div class="card shadow-lg border-light rounded-3 hover-shadow">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="bi bi-gear-fill text-danger"></i> Interface Gráfica e CLI</h5>
-                        <p class="card-text">Acesse a ferramenta via interface gráfica web ou linha de comando (CLI),
-                            conforme sua preferência.</p>
+                <div class="card h-100 border-0 shadow-sm rounded-4">
+                    <div class="card-body text-center">
+                        <i class="bi bi-gear-fill text-danger fs-2 mb-3"></i>
+                        <h5 class="card-title fw-semibold">Interface Gráfica e CLI</h5>
+                        <p class="card-text text-muted fs-6">
+                            Use via web UI intuitiva ou CLI para integração em pipelines.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="mt-5">
-        <h2 class="text-center text-primary mb-4">Contexto e Aplicação</h2>
-        <p class="lead">
-            O FHIR é um padrão utilizado para definir a interoperabilidade de dados em saúde, e os artefatos que o
-            compõem podem ser complexos de se navegar devido ao grande número de recursos e suas inter-relações.
-            O <strong>FHIR Artifact Analyzer</strong> facilita a exploração desses artefatos e seus vínculos, ajudando
-            desenvolvedores e integradores a entender melhor como trabalhar com o padrão.
+    <section class="bg-light rounded-4 p-5 px-md-5 mx-md-auto" style="max-width:800px;">
+        <h2 class="text-center text-primary mb-4 fw-semibold">Contexto e Aplicação</h2>
+        <p class="lead text-secondary fs-5">
+            O padrão <strong>FHIR</strong> define a interoperabilidade de dados em saúde. A ferramenta auxilia na navegação
+            entre seus complexos recursos e relacionamentos, tornando-se essencial para desenvolvedores, analistas e integradores
+            que trabalham com saúde digital.
         </p>
     </section>
 </div>
-
-<style>
-    body {
-        font-family: 'Arial', sans-serif;
-    }
-
-    h1,
-    h2 {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        font-weight: bold;
-    }
-
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-body {
-        padding: 20px;
-    }
-
-    .hover-shadow:hover {
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .lead {
-        font-size: 1.2rem;
-        color: #555;
-    }
-
-    a,
-    .btn {
-        text-decoration: none;
-        color: #007bff;
-        transition: color 0.3s ease;
-    }
-
-    a:hover,
-    .btn:hover {
-        color: #0056b3;
-    }
-</style>

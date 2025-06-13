@@ -1,29 +1,36 @@
-﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-3">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">FhirArtifactAnalyzer</a>
+        <a class="navbar-brand fw-bold text-light" href="">
+            <i class="bi bi-layers-half me-2"></i>FhirArtifactAnalyzer
+        </a>
+
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
                 aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="mainNavbar">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-lg-2">
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                        <i class="bi bi-house-door-fill me-2"></i> Home
+                    <NavLink class="nav-link text-light" href="" Match="NavLinkMatch.All" activeclassname="active">
+                        <i class="bi bi-house-door-fill me-2"></i>Home
                     </NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="upload">
-                        <i class="bi bi-plus-square-fill me-2"></i> Upload
-                    </NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="weather">
-                        <i class="bi bi-list-nested me-2"></i> Weather
+                    <NavLink class="nav-link text-light" href="upload" activeclassname="active">
+                        <i class="bi bi-cloud-upload-fill me-2"></i>Upload
                     </NavLink>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+
+<style>
+    .nav-link.active {
+        font-weight: bold;
+        border-bottom: 2px solid #0d6efd;
+        color: #ffffff !important;
+    }
+
+</style>

@@ -10,4 +10,8 @@
     <ProjectReference Include="..\FhirArtifactAnalyzer.CrossCutting\FhirArtifactAnalyzer.CrossCutting.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SharpCompress" Version="0.40.0" />
+  </ItemGroup>
+
 </Project>

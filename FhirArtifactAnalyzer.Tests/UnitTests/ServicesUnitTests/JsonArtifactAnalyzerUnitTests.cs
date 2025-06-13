@@ -8,13 +8,13 @@ using System.Text.Json;
 
 namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesUnitTests
 {
-    public class JsonArtifactAnalyzerTests
+    public class JsonArtifactAnalyzerUnitTests
     {
         private readonly Mock<IFhirParserFactory> _parserFactoryMock;
         private readonly Mock<IFhirParser> _parserMock;
         private readonly JsonArtifactAnalyzer _analyzer;
 
-        public JsonArtifactAnalyzerTests()
+        public JsonArtifactAnalyzerUnitTests()
         {
             _parserFactoryMock = new Mock<IFhirParserFactory>();
             _parserMock = new Mock<IFhirParser>();

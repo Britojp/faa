@@ -6,9 +6,9 @@ using Hl7.Fhir.Serialization;
 using Moq;
 using System.Text;
 
-namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
+namespace FhirArtifactAnalyzer.Tests.IntegrationTests.ServicesIntegrationTests
 {
-    public class ArtifactValidationTest
+    public class ArtifactValidationIntegrationTests
     {
     
         [Fact]

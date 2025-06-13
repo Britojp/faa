@@ -3,13 +3,13 @@ using Xunit;
 using FhirArtifactAnalyzer.Application.Services;
 using Xunit.Abstractions;
 
-namespace FhirArtifactAnalyzer.Tests.UnitTests.ServicesTests
+namespace FhirArtifactAnalyzer.Tests.IntegrationTests.ServicesIntegrationTests
 {
-    public class ExtractorServiceTest
+    public class ExtractorServiceIntegrationTests
     {
         private readonly ITestOutputHelper _output;
 
-        public ExtractorServiceTest(ITestOutputHelper output)
+        public ExtractorServiceIntegrationTests(ITestOutputHelper output)
         {
             _output = output;
         }

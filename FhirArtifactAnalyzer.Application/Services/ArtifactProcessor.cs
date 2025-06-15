@@ -81,7 +81,7 @@ namespace FhirArtifactAnalyzer.Application.Services
                     }
 
                 case InputType.Url:
-                    throw new NotImplementedException("Entrada via URL ainda não foi implementada.");
+                    throw new NotImplementedException("Entrada via URL ainda nao foi implementada.");
             }
 
             return paths;
